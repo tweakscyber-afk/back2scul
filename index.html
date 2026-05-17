@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Back2‑School Earnie · Earn for Education</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(145deg, #f0f7ff 0%, #d4e7fe 100%);
+      min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
+    }
+    .app-shell {
+      width:100%; max-width:480px;
+      background: rgba(255,255,255,0.75); backdrop-filter:blur(25px);
+      border-radius:36px; box-shadow:0 30px 50px rgba(0,40,70,0.15), inset 0 1px 0 white;
+      border:1px solid rgba(255,255,255,0.5); overflow:hidden;
+    }
+    .screen {
+      display:none; padding:32px 24px 24px; flex-direction:column; gap:20px; max-height:80vh; overflow-y:auto;
+    }
+    .screen.active { display:flex; }
+
+    .splash-logo { font-size:2.6rem; font-weight:800; color:#005b9f; text-align:center; letter-spacing:-1px; margin:20px 0 10px; text-shadow:0 2px 5px rgba(0,91,159,0.2); }
+    .splash-subtitle { text-align:center; color:#2c3e50; font-weight:500; margin-bottom:20px; }
+
+    .balance-panel {
+      background: linear-gradient(115deg, #005b9f, #0077cc);
+      padding:24px; border-radius:28px; color:white; box-shadow:0 12px 24px rgba(0,91,159,0.25);
+    }
+    .progress-ring { height:10px; background:rgba(255,255,255,0.3); border-radius:20px; margin:16px 0 8px; overflow:hidden; }
+    .progress-fill { height:100%; background:#4caf50; width:0%; border-radius:20px; transition: width 0.4s ease; }
+
+    .task-card {
+      background:white; padding:18px; border-radius:20px; display:flex; justify-content:space-between; align-items:center;
+      cursor:pointer; box-shadow:0 4px 15px rgba(0,0,0,0.04); border:1px solid #e8f0fe; transition:all 0.2s; margin-bottom:8px;
+    }
+    .task-card:hover { border-color:#4caf50; transform:translateY(-2px); box-shadow:0 8px 18px rgba(0,0,0,0.06); }
+    .reward-tag { background:#e8f5e9; color:#2e7d32; padding:4px 14px; border-radius:40px; font-weight:600; font-size:0.8rem; }
+
+    .btn {
+      border:none; padding:16px 20px; border-radius:60px; font-weight:600; font-size:0.95rem; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; gap:8px; transition:0.2s; width:100%; margin-bottom:12px;
+    }
+    .btn-primary { background:#4caf50; color:white; box-shadow:0 6px 16px rgba(76,175,80,0.3); }
+    .btn-primary:hover { background:#43a047; }
+    .btn-secondary { background:#eef2ff; color:#1e3a5f; }
+    .btn-outline { background:transparent; border:2px solid #4caf50; color:#4caf50; }
+    .btn-danger { background:#e53935; color:white; }
+    .btn:disabled { opacity:0.6; pointer-events:none; }
+
+    input, select, textarea {
+      width:100%; padding:14px 18px; background:white; border:1.5px solid #cddbf5; border-radius:60px;
+      font-size:0.95rem; margin-bottom:12px;
+    }
+    textarea { border-radius:24px; min-height:80px; }
+
+    .toast {
+      position:fixed; bottom:30px; left:50%; transform:translateX(-50%);
+      background:#1e3a5f; color:white; padding:12px 24px; border-radius:60px; font-size:0.85rem; z-index:3000;
+      box-shadow:0 8px 20px rgba(0,0,0,0.2);
+    }
+    .toast.error { background:#c62828; }
+
+    .loading-dot {
+      display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:white;
+      border-radius:50%; animation:spin 0.6s linear infinite;
+    }
+    @keyframes spin { to{transform:rotate(360deg);} }
+
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20; vertical-align:middle; }
+    .nav-tabs { display:flex; justify-content:center; gap:5px; margin:5px 0; flex-wrap:wrap; }
+    .nav-tab { padding:10px 18px; border-radius:40px; font-size:0.8rem; cursor:pointer; font-weight:500; background:#eef2ff; color:#1a2a4a; transition:all 0.2s; border:none; }
+    .nav-tab.active { background:#005b9f; color:white; }
+    .nav-tab:hover { background:#d4e7fe; }
+    .hidden { display:none !important; }
+    .admin-badge { background:#ff9800; color:white; padding:2px 10px; border-radius:20px; font-size:0.7rem; margin-left:8px; }
+    
+    .partnership-section {
+      background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+      padding: 20px;
+      border-radius: 20px;
+      margin: 15px 0;
+    }
+    .partnership-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 15px 0;
+    }
+    .partner-badge {
+      background: white;
+      padding: 12px;
+      border-radius: 12px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.85rem;
+      border: 2px solid #005b9f;
+      color: #005b9f;
+    }
+
+    /* Modal overlay styles */
+    .modal-overlay {
+      position:fixed; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center;
+      z-index:2500;
+    }
+    .modal-box {
+      background:white; padding:24px; border-radius:24px;
+      width:90%; max-width:360px; box-shadow:0 10px 30px rgba(0,0,0,0.2);
+      max-height:80vh; overflow-y:auto; position:relative;
+    }
+    .modal-close-btn {
+      position:absolute; top:12px; right:12px;
+      background:#eef2ff; border:none; border-radius:50%; width:40px; height:40px;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      font-size:1.2rem; color:#005b9f;
+    }
+    .modal-close-btn:hover { background:#005b9f; color:white; }
+  </style>
+</head>
+<body>
+<div class="app-shell" id="app">
+  <!-- Splash Screen -->
+  <div class="screen active" id="screenSplash">
+    <div class="splash-logo">📚<br>Back2School<br>Earnie</div>
+    <div class="splash-subtitle">Earn for supplies · Trusted Platform</div>
+    <button class="btn btn-primary" id="btnDemo"><span class="material-symbols-outlined">play_arrow</span> Try Free Demo</button>
+    <button class="btn btn-outline" id="btnGoAuth"><span class="material-symbols-outlined">login</span> Sign In / Register</button>
+  </div>
+
+  <!-- Demo Dashboard -->
+  <div class="screen" id="screenDemo">
+    <div class="balance-panel">
+      <div style="font-size:0.75rem; opacity:0.9;">↗ DEMO BALANCE</div>
+      <div style="font-size:2.8rem; font-weight:800;" id="demoBalance">2,000</div>
+      <div>UGX</div>
+      <div class="progress-ring"><div class="progress-fill" id="demoProgress" style="width:20%"></div></div>
+      <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+        <span>🎯 Target 10,000</span><span id="demoProgressText">2,000 / 10,000</span>
+      </div>
+    </div>
+    
+    <!-- Partnership Section in Demo -->
+    <div class="partnership-section">
+      <h3 style="color:#005b9f; margin-bottom:10px;">🤝 Trusted Partners</h3>
+      <p style="font-size:0.85rem; color:#555; margin-bottom:12px;">Back2School Earnie is proudly supported by:</p>
+      <div class="partnership-grid">
+        <div class="partner-badge">🌍 UNICEF</div>
+        <div class="partner-badge">🇺🇬 NNSF</div>
+        <div class="partner-badge">🎓 NNSU</div>
+        <div class="partner-badge">🇪🇺 EU Commission</div>
+        <div class="partner-badge">📚 UNESCO</div>
+        <div class="partner-badge">💡 GSMA</div>
+        <div class="partner-badge">🏛️ World Bank</div>
+        <div class="partner-badge">🤖 ITU</div>
+      </div>
+      <p style="font-size:0.75rem; color:#999; text-align:center; margin-top:10px;">
+        Supporting education access across Africa & beyond
+      </p>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="task-card" id="demoSurvey"><div><span class="material-symbols-outlined">assignment</span> Quick Survey</div><span class="reward-tag">+2,500</span></div>
+      <div class="task-card" id="demoQuiz"><div><span class="material-symbols-outlined">psychology</span> General Quiz</div><span class="reward-tag">+2,000</span></div>
+      <div class="task-card" id="demoMemory"><div><span class="material-symbols-outlined">memory</span> Memory Match</div><span class="reward-tag">+2,200</span></div>
+      <div class="task-card" id="demoReflex"><div><span class="material-symbols-outlined">bolt</span> Tap Reflex</div><span class="reward-tag">+1,500</span></div>
+      <div class="task-card" id="demoSpin"><div><span class="material-symbols-outlined">casino</span> Lucky Spin</div><span class="reward-tag">500‑6k</span></div>
+      <div class="task-card" id="demoTicTac"><div><span class="material-symbols-outlined">grid_on</span> Tic‑Tac‑Toe</div><span class="reward-tag">+1,800</span></div>
+    </div>
+    <button class="btn btn-primary hidden" id="btnDemoWithdraw"><span class="material-symbols-outlined">unlock</span> Unlock Full Version (10k needed)</button>
+    <button class="btn btn-secondary" id="btnBackFromDemo"><span class="material-symbols-outlined">arrow_back</span> Back to Home</button>
+  </div>
+
+  <!-- Auth Selection -->
+  <div class="screen" id="screenAuth">
+    <h2 style="color:#005b9f;">🔐 Sign In</h2>
+    <button class="btn btn-primary" id="btnEmailLogin"><span class="material-symbols-outlined">email</span> Sign in with Email</button>
+    <button class="btn btn-outline" id="btnPhoneLogin"><span class="material-symbols-outlined">smartphone</span> Sign in with Phone</button>
+    <p style="text-align:center; font-size:0.8rem;">New? <a href="#" id="linkToRegister">Create account</a></p>
+    <p style="text-align:center; font-size:0.8rem;"><a href="#" id="backFromAuth"><span class="material-symbols-outlined" style="font-size:0.9rem;">arrow_back</span> Back</a></p>
+  </div>
+
+  <!-- Email Login -->
+  <div class="screen" id="screenEmailLogin">
+    <h2 style="color:#005b9f;">📧 Email Sign In</h2>
+    <input type="email" id="emailInput" placeholder="Email" autocomplete="email">
+    <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password">
+    <button class="btn btn-primary" id="btnEmailSubmit"><span class="material-symbols-outlined">login</span> Sign In</button>
+    <div id="emailError" style="color:#c62828; text-align:center; font-size:0.8rem;"></div>
+    <p style="text-align:center; font-size:0.8rem;"><a href="#" id="backToAuth1"><span class="material-symbols-outlined" style="font-size:0.9rem;">arrow_back</span> Back</a></p>
+  </div>
+
+  <!-- Phone OTP Login -->
+  <div class="screen" id="screenPhoneLogin">
+    <h2 style="color:#005b9f;">📲 Phone Sign In</h2>
+    <input type="tel" id="phoneLoginInput" placeholder="07XXXXXXXX" autocomplete="tel">
+    <button class="btn btn-primary" id="btnSendOTP"><span class="material-symbols-outlined">send</span> Send OTP</button>
+    <input type="text" id="otpInput" placeholder="6‑digit code" class="hidden" autocomplete="one-time-code">
+    <button class="btn btn-primary hidden" id="btnVerifyOTP"><span class="material-symbols-outlined">check_circle</span> Verify</button>
+    <div id="phoneError" style="color:#c62828; text-align:center; font-size:0.8rem;"></div>
+    <p style="text-align:center; font-size:0.8rem;"><a href="#" id="backToAuth2"><span class="material-symbols-outlined" style="font-size:0.9rem;">arrow_back</span> Back</a></p>
+  </div>
+
+  <!-- Registration -->
+  <div class="screen" id="screenRegister">
+    <h2 style="color:#005b9f;">📝 Create Account</h2>
+    <div style="background:#e3f2fd; padding:12px; border-radius:16px; margin-bottom:8px;">
+      💰 Demo earnings: <strong id="pendingEarnings">0</strong> UGX will be added after approval.
+    </div>
+    <input type="text" id="regFullName" placeholder="Full Name" autocomplete="name">
+    <input type="text" id="regUsername" placeholder="Username" autocomplete="username">
+    <input type="email" id="regEmail" placeholder="Email address" autocomplete="email">
+    <input type="password" id="regPassword" placeholder="Password (min 6)" autocomplete="new-password">
+    <input type="tel" id="regPhone" placeholder="07XXXXXXXX" autocomplete="tel">
+    <select id="regNetwork"><option value="">Select Network</option><option>MTN</option><option>Airtel</option></select>
+    <select id="regUserType"><option value="student">Student – 5,000 UGX</option><option value="adult">Adult – 10,000 UGX</option></select>
+    <div style="background:#fff3e0; padding:14px; border-radius:16px; font-size:0.85rem; margin:8px 0;">
+      💳 Pay to: <strong>0767310767</strong> (EJUKU JOB JESSE)<br>
+      Use activation code: <strong>BACK2SCHOOL2025</strong>
+    </div>
+    <input type="text" id="regActivationCode" placeholder="Activation code" autocomplete="off">
+    <button class="btn btn-primary" id="btnRegisterSubmit"><span class="material-symbols-outlined">how_to_reg</span> Complete Registration</button>
+    <div id="regError" style="color:#c62828; font-size:0.8rem; text-align:center;"></div>
+    <p style="text-align:center; font-size:0.8rem;">Already have an account? <a href="#" id="goToAuth">Sign in</a></p>
+  </div>
+
+  <!-- Full Dashboard -->
+  <div class="screen" id="screenDashboard">
+    <div class="balance-panel">
+      <div style="font-size:0.75rem; opacity:0.9;">YOUR BALANCE</div>
+      <div style="font-size:2.8rem; font-weight:800;" id="userBalance">0</div>
+      <div>UGX</div>
+      <div class="progress-ring"><div class="progress-fill" id="withdrawProgress" style="width:0%"></div></div>
+      <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+        <span>🎯 Withdraw at 35k</span><span id="withdrawProgressText">0 / 35,000</span>
+      </div>
+    </div>
+    <div class="nav-tabs">
+      <div class="nav-tab active" data-tab="tabTasks">Tasks</div>
+      <div class="nav-tab" data-tab="tabSupport">Support</div>
+      <div class="nav-tab" data-tab="tabAbout">About</div>
+    </div>
+    <div id="tabTasks">
+      <div class="task-card" id="fullSurvey"><div><span class="material-symbols-outlined">assignment</span> Survey</div><span class="reward-tag">~500</span></div>
+      <div class="task-card" id="fullQuiz"><div><span class="material-symbols-outlined">psychology</span> Quiz</div><span class="reward-tag">~500</span></div>
+      <div class="task-card" id="fullMemory"><div><span class="material-symbols-outlined">memory</span> Memory</div><span class="reward-tag">~500</span></div>
+      <div class="task-card" id="fullReflex"><div><span class="material-symbols-outlined">bolt</span> Reflex</div><span class="reward-tag">~500</span></div>
+      <div class="task-card" id="fullSpin"><div><span class="material-symbols-outlined">casino</span> Spin</div><span class="reward-tag">0‑1500</span></div>
+      <div class="task-card" id="fullTicTac"><div><span class="material-symbols-outlined">grid_on</span> Tic‑Tac‑Toe</div><span class="reward-tag">~500</span></div>
+      <div style="text-align:right; font-size:0.7rem; color:#555;">Daily: <span id="dailyCount">0</span>/10</div>
+    </div>
+    <div id="tabSupport" class="hidden">
+      <textarea id="supportMsg" placeholder="Describe your issue..."></textarea>
+      <button class="btn btn-secondary" id="btnSendSupport"><span class="material-symbols-outlined">send</span> Send</button>
+      <div id="supportConfirm" style="font-size:0.8rem;"></div>
+    </div>
+    <div id="tabAbout" class="hidden">
+      <h4 style="color:#005b9f;">📘 About Back2‑School Earnie</h4>
+      <p style="font-size:0.9rem;">We help students and adults earn real money for school supplies through quick, fun tasks. All earnings are securely stored, and withdrawals are processed after reaching the threshold.</p>
+      <p style="font-size:0.85rem; margin-top:10px;"><strong>Trusted by:</strong> UNICEF, NNSF, NNSU, EU Commission, UNESCO, and more.</p>
+      <p style="font-size:0.8rem;">support@back2school.com</p>
+    </div>
+    <button class="btn btn-primary" id="btnWithdraw" disabled><span class="material-symbols-outlined">payments</span> Withdraw (35k needed)</button>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-secondary" id="btnCopyRef"><span class="material-symbols-outlined">share</span> Referral</button>
+      <button class="btn btn-outline" id="btnLogout">Logout</button>
+    </div>
+    <button class="btn btn-secondary hidden" id="btnAdminPanel">🛡️ Admin Panel</button>
+  </div>
+
+  <!-- Admin Dashboard -->
+  <div class="screen" id="screenAdmin">
+    <h2 style="color:#005b9f;">🛡️ Admin Dashboard</h2>
+    <div class="nav-tabs">
+      <div class="nav-tab active" data-admin-tab="adminUsers">Pending Users</div>
+      <div class="nav-tab" data-admin-tab="adminSupport">Support</div>
+      <div class="nav-tab" data-admin-tab="adminWithdrawals">Withdrawals</div>
+    </div>
+    <div id="adminUsers" class="admin-tab"></div>
+    <div id="adminSupport" class="admin-tab hidden"></div>
+    <div id="adminWithdrawals" class="admin-tab hidden"></div>
+    <button class="btn btn-outline" id="btnBackToDashboard"><span class="material-symbols-outlined">arrow_back</span> Back to Dashboard</button>
+  </div>
+</div>
+
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+const SUPABASE_URL = "https://ykfbadyublrmsrjvbuwz.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlrZmJhZHl1YmxybXNyanZidXd6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNzAyMDcsImV4cCI6MjA5MzY0NjIwN30.yrcbG5PLfNxJVGb8KLgRRoQ4XhqZKhJhKBMTnUnFQPA";
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let demoBalance = 2000;
+let todayTaskCount = 0;
+
+// Navigation stack for history tracking
+let navigationStack = ['screenSplash'];
+let modalOpen = false;
+
+// ---------- HELPERS ----------
+function showToast(msg, isError = false) {
+  // Remove existing toasts
+  document.querySelectorAll('.toast').forEach(t => t.remove());
+  
+  const t = document.createElement('div');
+  t.className = `toast ${isError ? 'error' : ''}`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+function showScreen(id) {
+  if (modalOpen) return;
+  
+  // Hide all screens
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  
+  // Show the requested screen
+  const screen = document.getElementById(id);
+  if (screen) {
+    screen.classList.add('active');
+    
+    // Update navigation stack (avoid duplicates)
+    if (navigationStack[navigationStack.length - 1] !== id) {
+      navigationStack.push(id);
+    }
+    
+    console.log('Showing screen:', id); // Debug log
+  } else {
+    console.error('Screen not found:', id);
+  }
+}
+
+function goBack() {
+  if (modalOpen) return;
+  
+  if (navigationStack.length > 1) {
+    navigationStack.pop(); // Remove current screen
+    const previousScreen = navigationStack[navigationStack.length - 1];
+    
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const screen = document.getElementById(previousScreen);
+    if (screen) {
+      screen.classList.add('active');
+      console.log('Going back to:', previousScreen); // Debug log
+    }
+  }
+}
+
+function setLoading(btn, isLoading) {
+  if (!btn) return;
+  if (isLoading) {
+    btn.disabled = true;
+    btn.dataset.origHtml = btn.innerHTML;
+    btn.innerHTML = '<span class="loading-dot"></span> Processing...';
+  } else {
+    btn.disabled = false;
+    if (btn.dataset.origHtml) btn.innerHTML = btn.dataset.origHtml;
+  }
+}
+
+function clearErrors() {
+  const errorEls = ['emailError', 'phoneError', 'regError'];
+  errorEls.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '';
+  });
+}
+
+function closeModal() {
+  const overlay = document.querySelector('.modal-overlay');
+  if (overlay) {
+    overlay.remove();
+    modalOpen = false;
+  }
+}
+
+// ========== TAB SWITCHING FIX ==========
+function initTabSwitching() {
+  console.log('Initializing tab switching...'); // Debug log
+  
+  // Dashboard tabs (Tasks/Support/About)
+  const dashboardTabs = document.querySelectorAll('#screenDashboard .nav-tab');
+  console.log('Found dashboard tabs:', dashboardTabs.length); // Debug log
+  
+  dashboardTabs.forEach(tab => {
+    tab.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const tabName = this.getAttribute('data-tab');
+      console.log('Dashboard tab clicked:', tabName); // Debug log
+      
+      // Remove active class from all tabs
+      dashboardTabs.forEach(t => t.classList.remove('active'));
+      
+      // Hide all tab content
+      const tabTasks = document.getElementById('tabTasks');
+      const tabSupport = document.getElementById('tabSupport');
+      const tabAbout = document.getElementById('tabAbout');
+      
+      if (tabTasks) tabTasks.classList.add('hidden');
+      if (tabSupport) tabSupport.classList.add('hidden');
+      if (tabAbout) tabAbout.classList.add('hidden');
+      
+      // Activate clicked tab
+      this.classList.add('active');
+      
+      // Show corresponding tab content
+      const tabContent = document.getElementById(tabName);
+      if (tabContent) {
+        tabContent.classList.remove('hidden');
+        console.log('Showing tab content:', tabName); // Debug log
+      } else {
+        console.error('Tab content not found:', tabName);
+      }
+    });
+  });
+
+  // Admin dashboard tabs
+  const adminTabs = document.querySelectorAll('#screenAdmin .nav-tab');
+  console.log('Found admin tabs:', adminTabs.length); // Debug log
+  
+  adminTabs.forEach(tab => {
+    tab.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const tabName = this.getAttribute('data-admin-tab');
+      console.log('Admin tab clicked:', tabName); // Debug log
+      
+      // Remove active class from all tabs
+      adminTabs.forEach(t => t.classList.remove('active'));
+      
+      // Hide all admin tab content
+      const adminTabContents = document.querySelectorAll('.admin-tab');
+      adminTabContents.forEach(content => content.classList.add('hidden'));
+      
+      // Activate clicked tab
+      this.classList.add('active');
+      
+      // Show corresponding admin tab content
+      const tabContent = document.getElementById(tabName);
+      if (tabContent) {
+        tabContent.classList.remove('hidden');
+        console.log('Showing admin tab content:', tabName); // Debug log
+      } else {
+        console.error('Admin tab content not found:', tabName);
+      }
+    });
+  });
+}
+
+// ---------- TASK GAMES ----------
+function launchSurvey(callback) {
+  const questions = [
+    { q: "How often do you buy school supplies?", opts: ["Weekly", "Monthly", "Once a term"] },
+    { q: "What's your favorite subject?", opts: ["Math", "English", "Science"] },
+    { q: "Would you recommend Back2School Earnie?", opts: ["Yes", "No", "Maybe"] }
+  ];
+  let idx = 0;
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  const box = document.createElement('div');
+  box.className = 'modal-box';
+  
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'modal-close-btn';
+  closeBtn.innerHTML = '<span class="material-symbols-outlined">close</span>';
+  closeBtn.onclick = () => { overlay.remove(); modalOpen = false; callback(false); };
+  
+  box.appendChild(closeBtn);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  modalOpen = true;
+  
+  function render() {
+    if (idx >= questions.length) { overlay.remove(); modalOpen = false; callback(true); return; }
+    const q = questions[idx];
+    
+    // Clear box except close button
+    while (box.firstChild) {
+      box.removeChild(box.firstChild);
+    }
+    
+    // Re-add close button
+    box.appendChild(closeBtn);
+    
+    // Add question
+    const h3 = document.createElement('h3');
+    h3.textContent = q.q;
+    box.appendChild(h3);
+    
+    // Add options
+    q.opts.forEach(opt => {
+      const btn = document.createElement('div');
+      btn.style.cssText = 'padding:12px;margin:6px 0;background:#e8f5e9;border-radius:40px;cursor:pointer;text-align:center;';
+      btn.textContent = opt;
+      btn.onclick = () => { idx++; render(); };
+      box.appendChild(btn);
+    });
+  }
+  render();
+}
+
+function launchQuiz(callback) {
+  const qs = [
+    { q: "Capital of Uganda?", a: "Kampala", opts: ["Kampala", "Nairobi", "Dar es Salaam"] },
+    { q: "2 + 2 = ?", a: "4", opts: ["3", "4", "5"] },
+    { q: "How many continents are there?", a: "7", opts: ["5", "6", "7"] }
+  ];
+  let idx = 0;
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  const box = document.createElement('div');
+  box.className = 'modal-box';
+  
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'modal-close-btn';
+  closeBtn.innerHTML = '<span class="material-symbols-outlined">close</span>';
+  closeBtn.onclick = () => { overlay.remove(); modalOpen = false; callback(false); };
+  
+  box.appendChild(closeBtn);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  modalOpen = true;
+  
+  function render() {
+    if (idx >= qs.length) { overlay.remove(); modalOpen = false; callback(true); return; }
+    const q = qs[idx];
+    
+    // Clear box except close button
+    while (box.firstChild) {
+      box.removeChild(box.firstChild);
+    }
+    
+    // Re-add close button
+    box.appendChild(closeBtn);
+    
+    // Add question
+    const h3 = document.createElement('h3');
+    h3.textContent = q.q;
+    box.appendChild(h3);
+    
+    // Add options
+    q.opts.forEach(opt => {
+      const btn = document.createElement('div');
+      btn.style.cssText = 'padding:12px;margin:6px 0;background:#fff3e0;border-radius:40px;cursor:pointer;text-align:center;';
+      btn.textContent = opt;
+      btn.onclick = () => {
+        if (opt === q.a) { idx++; render(); }
+        else { showToast('Wrong answer, try again.', true); }
+      };
+      box.appendChild(btn);
+    });
+  }
+  render();
+}
+
+function launchMemoryGame(callback) {
+  const icons = ['🐙','🐬','🦋','🐧','🦊','🐝'];
+  let cards = [...icons, ...icons].sort(() => Math.random() - 0.5);
+  let opened = [], matched = [];
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  const grid = document.createElement('div');
+  grid.style.cssText = 'background:white;padding:24px;border-radius:24px;display:flex;flex-direction:column;align-items:center;max-height:80vh;overflow-y:auto;position:relative;';
+  
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'modal-close-btn';
+  closeBtn.innerHTML = '<span class="material-symbols-outlined">close</span>';
+  closeBtn.onclick = () => { overlay.remove(); modalOpen = false; callback(false); };
+  
+  grid.appendChild(closeBtn);
+  overlay.appendChild(grid);
+  document.body.appendChild(overlay);
+  modalOpen = true;
+  
+  function render() {
+    const cardsContainer = document.createElement('div');
+    cardsContainer.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:50px;';
+    cards.forEach((icon, idx) => {
+      const card = document.createElement('div');
+      card.style.cssText = 'width:70px;height:70px;display:flex;align-items:center;justify-content:center;font-size:2rem;background:#e3f2fd;border-radius:12px;cursor:pointer;';
+      card.textContent = (matched.includes(idx) || opened.includes(idx)) ? icon : '❓';
+      card.onclick = () => {
+        if (opened.length === 2 || matched.includes(idx) || opened.includes(idx)) return;
+        opened.push(idx);
+        render();
+        if (opened.length === 2) {
+          if (cards[opened[0]] === cards[opened[1]]) {
+            matched.push(...opened);
+          }
+          setTimeout(() => { opened = []; render(); if (matched.length === cards.length) { overlay.remove(); modalOpen = false; callback(true); } }, 500);
+        }
+      };
+      cardsContainer.appendChild(card);
+    });
+    
+    // Remove old cards container if exists
+    const oldContainer = grid.querySelector('div:not([class])');
+    if (oldContainer) oldContainer.remove();
+    
+    grid.appendChild(cardsContainer);
+  }
+  render();
+}
+
+function launchReflex(callback) {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  const box = document.createElement('div');
+  box.className = 'modal-box';
+  box.style.cssText = 'text-align:center;';
+  
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'modal-close-btn';
+  closeBtn.innerHTML = '<span class="material-symbols-outlined">close</span>';
+  closeBtn.onclick = () => { overlay.remove(); modalOpen = false; callback(false); };
+  
+  box.appendChild(closeBtn);
+  box.innerHTML += `<h3>⚡ Tap within 1.5s!</h3><div id="reflexTimer" style="font-size:2rem;margin:12px;">1.5</div><button id="tapReflexBtn" class="btn btn-primary">TAP</button>`;
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  modalOpen = true;
+  
+  let startTime = Date.now();
+  const tapBtn = document.getElementById('tapReflexBtn');
+  if (tapBtn) {
+    tapBtn.onclick = () => {
+      const time = (Date.now() - startTime) / 1000;
+      overlay.remove();
+      modalOpen = false;
+      if (time <= 1.5) callback(true);
+      else { showToast('Too slow!', true); }
+    };
+  }
+}
+
+function spinWheel(callback) {
+  const prizes = [500, 800, 1200, 2000, 3500, 5000, 7000];
+  const prize = prizes[Math.floor(Math.random() * prizes.length)];
+  showToast(`Spinning... won ${prize} UGX!`);
+  callback(prize);
+}
+
+function launchTicTacToe(callback) {
+  const board = Array(9).fill(null);
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  const grid = document.createElement('div');
+  grid.style.cssText = 'background:white;padding:24px;border-radius:24px;display:flex;flex-direction:column;align-items:center;position:relative;';
+  
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'modal-close-btn';
+  closeBtn.innerHTML = '<span class="material-symbols-outlined">close</span>';
+  closeBtn.onclick = () => { overlay.remove(); modalOpen = false; callback(false); };
+  
+  grid.appendChild(closeBtn);
+  overlay.appendChild(grid);
+  document.body.appendChild(overlay);
+  modalOpen = true;
+  
+  function checkWin() {
+    const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    for (const [a,b,c] of wins) if (board[a] && board[a]===board[b] && board[a]===board[c]) return board[a];
+    return null;
+  }
+  
+  function computerMove() {
+    const empty = board.reduce((a, v, i) => (v===null && a.push(i), a), []);
+    if (empty.length) {
+      const pick = empty[Math.floor(Math.random()*empty.length)];
+      board[pick] = 'O';
+      render();
+      if (checkWin()==='O') { overlay.remove(); modalOpen = false; callback(false); showToast('Computer won!', true); }
+      else if (!board.includes(null)) { overlay.remove(); modalOpen = false; callback(false); showToast('Draw!', true); }
+    }
+  }
+  
+  function render() {
+    const boardContainer = document.createElement('div');
+    boardContainer.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:50px;';
+    board.forEach((v,i) => {
+      const cell = document.createElement('div');
+      cell.style.cssText = 'width:60px;height:60px;display:flex;align-items:center;justify-content:center;background:#e8f5e9;border-radius:12px;font-size:2rem;cursor:pointer;';
+      cell.textContent = v || '';
+      cell.onclick = () => {
+        if (v || checkWin()) return;
+        board[i] = 'X';
+        render();
+        if (checkWin()==='X') { overlay.remove(); modalOpen = false; callback(true); }
+        else if (!board.includes(null)) { overlay.remove(); modalOpen = false; callback(false); }
+        else setTimeout(computerMove, 400);
+      };
+      boardContainer.appendChild(cell);
+    });
+    
+    // Remove old board container if exists
+    const oldContainer = grid.querySelector('div:not([class])');
+    if (oldContainer) oldContainer.remove();
+    
+    grid.appendChild(boardContainer);
+  }
+  render();
+}
+
+// ---------- DEMO ----------
+function updateDemoUI() {
+  const balanceEl = document.getElementById('demoBalance');
+  const progressEl = document.getElementById('demoProgress');
+  const progressTextEl = document.getElementById('demoProgressText');
+  const withdrawBtn = document.getElementById('btnDemoWithdraw');
+  
+  if (balanceEl) balanceEl.textContent = demoBalance;
+  
+  const pct = Math.min((demoBalance / 10000) * 100, 100);
+  if (progressEl) progressEl.style.width = pct + '%';
+  if (progressTextEl) progressTextEl.textContent = `${demoBalance} / 10,000`;
+  
+  if (withdrawBtn) {
+    if (demoBalance >= 10000) {
+      withdrawBtn.classList.remove('hidden');
+    } else {
+      withdrawBtn.classList.add('hidden');
+    }
+  }
+  
+  localStorage.setItem('demoBalance', demoBalance);
+}
+
+function addDemoReward(amount) {
+  demoBalance += amount;
+  updateDemoUI();
+  showToast(`+${amount} UGX`);
+}
+
+// ---------- FULL USER ----------
+async function performTask(type, baseReward) {
+  if (!currentUser || todayTaskCount >= 10) {
+    showToast('Daily task limit (10) reached', true);
+    return;
+  }
+  
+  let reward = 0;
+  let success = false;
+  
+  const result = await new Promise(resolve => {
+    switch(type) {
+      case 'survey': launchSurvey(r => resolve(r)); break;
+      case 'quiz': launchQuiz(r => resolve(r)); break;
+      case 'memory': launchMemoryGame(r => resolve(r)); break;
+      case 'reflex': launchReflex(r => resolve(r)); break;
+      case 'spin': spinWheel(r => resolve(r)); break;
+      case 'tictactoe': launchTicTacToe(r => resolve(r)); break;
+    }
+  });
+  
+  if (typeof result === 'number') {
+    reward = result;
+    success = true;
+  } else if (result === true) {
+    success = true;
+    // For non-spin tasks that succeed, give a random reward
+    if (type !== 'spin') {
+      reward = Math.floor(baseReward * (0.8 + Math.random() * 0.4));
+    }
+  } else {
+    showToast('Task cancelled');
+    return;
+  }
+
+  if (success) {
+    // Update balance in database
+    if (reward > 0) {
+      const { error } = await supabase.from('profiles').update({
+        balance: currentUser.balance + reward,
+        tasks_completed: currentUser.tasks_completed + 1
+      }).eq('id', currentUser.id);
+      
+      if (error) { 
+        showToast('Error saving earnings', true); 
+        return; 
+      }
+      
+      currentUser.balance += reward;
+      currentUser.tasks_completed += 1;
+      
+      // Record task history
+      await supabase.from('task_history').insert([{ 
+        user_id: currentUser.id, 
+        task_type: type, 
+        reward 
+      }]);
+    } else {
+      const { error } = await supabase.from('profiles').update({
+        tasks_completed: currentUser.tasks_completed + 1
+      }).eq('id', currentUser.id);
+      
+      if (error) { 
+        showToast('Error updating tasks count', true); 
+        return; 
+      }
+      
+      currentUser.tasks_completed += 1;
+    }
+
+    todayTaskCount++;
+    const dailyCountEl = document.getElementById('dailyCount');
+    if (dailyCountEl) dailyCountEl.textContent = todayTaskCount;
+    
+    updateDashboardUI();
+    showToast(reward > 0 ? `+${reward} UGX` : 'Task completed (no reward this time)');
+  }
+}
+
+function updateDashboardUI() {
+  if (!currentUser) return;
+  
+  const balanceEl = document.getElementById('userBalance');
+  const progressEl = document.getElementById('withdrawProgress');
+  const progressTextEl = document.getElementById('withdrawProgressText');
+  const wbtn = document.getElementById('btnWithdraw');
+  const adminBtn = document.getElementById('btnAdminPanel');
+  
+  if (balanceEl) balanceEl.textContent = currentUser.balance;
+  
+  const pct = Math.min((currentUser.balance / 35000) * 100, 100);
+  if (progressEl) progressEl.style.width = pct + '%';
+  if (progressTextEl) progressTextEl.textContent = `${currentUser.balance} / 35,000`;
+  
+  if (wbtn) {
+    if (currentUser.balance >= 35000) {
+      wbtn.disabled = false;
+      wbtn.innerHTML = '<span class="material-symbols-outlined">payments</span> Withdraw 35,000 UGX';
+    } else {
+      wbtn.disabled = true;
+      wbtn.innerHTML = `<span class="material-symbols-outlined">payments</span> Need ${35000 - currentUser.balance} UGX`;
+    }
+  }
+  
+  if (adminBtn) {
+    if (currentUser.is_admin) {
+      adminBtn.classList.remove('hidden');
+    } else {
+      adminBtn.classList.add('hidden');
+    }
+  }
+}
+
+// ---------- ADMIN ----------
+async function loadAdminPendingUsers() {
+  const { data } = await supabase.from('profiles').select('*').eq('is_approved', false);
+  const container = document.getElementById('adminUsers');
+  
+  if (!container) return;
+  
+  container.innerHTML = data?.length ? data.map(u => `
+    <div style="background:white;border-radius:16px;padding:16px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+      <strong>${u.full_name}</strong> (@${u.username})<br>
+      ${u.phone} · ${u.user_type} · Balance: ${u.balance} UGX
+      <button class="btn btn-primary" style="margin-top:8px;" onclick="window.approveUser('${u.id}')">Approve</button>
+    </div>
+  `).join('') : '<p>No pending users.</p>';
+}
+
+window.approveUser = async (id) => {
+  await supabase.from('profiles').update({ is_approved: true }).eq('id', id);
+  loadAdminPendingUsers();
+};
+
+async function loadAdminSupport() {
+  const { data } = await supabase.from('support_messages').select('*, profiles(full_name, username)').order('created_at', { ascending: false });
+  const container = document.getElementById('adminSupport');
+  
+  if (!container) return;
+  
+  container.innerHTML = data?.map(m => `
+    <div style="background:white;border-radius:16px;padding:16px;margin-bottom:8px;">
+      <strong>${m.profiles?.full_name || 'Unknown'}</strong><br>${m.message}
+      ${m.admin_reply ? `<br><em>Reply: ${m.admin_reply}</em>` : ''}
+      <textarea id="reply-${m.id}" placeholder="Your reply..." style="margin-top:8px;"></textarea>
+      <button class="btn btn-primary" onclick="window.sendAdminReply('${m.id}')">Reply</button>
+    </div>
+  `).join('') || 'No messages.';
+}
+
+window.sendAdminReply = async (id) => {
+  const replyEl = document.getElementById(`reply-${id}`);
+  if (!replyEl) return;
+  
+  const reply = replyEl.value;
+  await supabase.from('support_messages').update({ admin_reply: reply, replied: true }).eq('id', id);
+  loadAdminSupport();
+};
+
+async function loadAdminWithdrawals() {
+  const { data } = await supabase.from('withdrawals').select('*, profiles(full_name, phone)').order('created_at', { ascending: false });
+  const container = document.getElementById('adminWithdrawals');
+  
+  if (!container) return;
+  
+  container.innerHTML = data?.map(w => `
+    <div style="background:white;border-radius:16px;padding:16px;margin-bottom:8px;">
+      <strong>${w.profiles?.full_name}</strong> · ${w.amount} UGX · ${w.status}
+      ${w.status === 'pending' ? `
+        <button class="btn btn-primary" onclick="window.updateWithdrawal('${w.id}','approved')">Approve</button>
+        <button class="btn btn-danger" onclick="window.updateWithdrawal('${w.id}','rejected')">Reject</button>
+      ` : ''}
+    </div>
+  `).join('') || 'No withdrawals.';
+}
+
+window.updateWithdrawal = async (id, status) => {
+  await supabase.from('withdrawals').update({ status }).eq('id', id);
+  loadAdminWithdrawals();
+};
+
+// Expose navigation globally
+window.goBack = goBack;
+window.showScreen = showScreen;
+window.modalOpen = false;
+
+// ---------- INITIALIZATION ----------
+document.addEventListener('DOMContentLoaded', async () => {
+  console.log('DOM loaded, initializing...'); // Debug log
+  
+  clearErrors();
+  
+  // Initialize tab switching FIRST
+  initTabSwitching();
+  
+  // Restore session
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+      if (profile?.is_approved) {
+        currentUser = profile;
+        navigationStack = ['screenDashboard'];
+        showScreen('screenDashboard');
+        updateDashboardUI();
+        const today = new Date().toISOString().slice(0,10);
+        const { count } = await supabase.from('task_history').select('*', { count: 'exact' }).eq('user_id', currentUser.id).gte('created_at', today);
+        todayTaskCount = count || 0;
+        const dailyCountEl = document.getElementById('dailyCount');
+        if (dailyCountEl) dailyCountEl.textContent = todayTaskCount;
+      } else {
+        await supabase.auth.signOut();
+        navigationStack = ['screenSplash'];
+        showScreen('screenSplash');
+      }
+    } else {
+      navigationStack = ['screenSplash'];
+      showScreen('screenSplash');
+    }
+  } catch (err) {
+    console.error('Session error:', err);
+    navigationStack = ['screenSplash'];
+    showScreen('screenSplash');
+  }
+
+  // ===== ALL BUTTON EVENT LISTENERS =====
+  
+  // Splash
+  const btnDemo = document.getElementById('btnDemo');
+  if (btnDemo) {
+    btnDemo.onclick = () => {
+      clearErrors();
+      demoBalance = parseInt(localStorage.getItem('demoBalance') || '2000');
+      updateDemoUI();
+      showScreen('screenDemo');
+    };
+  }
+  
+  const btnGoAuth = document.getElementById('btnGoAuth');
+  if (btnGoAuth) {
+    btnGoAuth.onclick = () => {
+      clearErrors();
+      showScreen('screenAuth');
+    };
+  }
+
+  // Auth selection
+  const btnEmailLogin = document.getElementById('btnEmailLogin');
+  if (btnEmailLogin) {
+    btnEmailLogin.onclick = () => {
+      clearErrors();
+      showScreen('screenEmailLogin');
+    };
+  }
+  
+  const btnPhoneLogin = document.getElementById('btnPhoneLogin');
+  if (btnPhoneLogin) {
+    btnPhoneLogin.onclick = () => {
+      clearErrors();
+      showScreen('screenPhoneLogin');
+    };
+  }
+  
+  const linkToRegister = document.getElementById('linkToRegister');
+  if (linkToRegister) {
+    linkToRegister.onclick = e => { 
+      e.preventDefault(); 
+      clearErrors();
+      showScreen('screenRegister'); 
+    };
+  }
+  
+  const backToAuth1 = document.getElementById('backToAuth1');
+  if (backToAuth1) {
+    backToAuth1.onclick = e => { 
+      e.preventDefault(); 
+      clearErrors();
+      goBack();
+    };
+  }
+  
+  const backToAuth2 = document.getElementById('backToAuth2');
+  if (backToAuth2) {
+    backToAuth2.onclick = e => { 
+      e.preventDefault(); 
+      clearErrors();
+      goBack();
+    };
+  }
+  
+  const backFromAuth = document.getElementById('backFromAuth');
+  if (backFromAuth) {
+    backFromAuth.onclick = e => { 
+      e.preventDefault(); 
+      clearErrors();
+      goBack();
+    };
+  }
+  
+  const goToAuth = document.getElementById('goToAuth');
+  if (goToAuth) {
+    goToAuth.onclick = e => { 
+      e.preventDefault(); 
+      clearErrors();
+      goBack();
+    };
+  }
+
+  // Email login
+  const btnEmailSubmit = document.getElementById('btnEmailSubmit');
+  if (btnEmailSubmit) {
+    btnEmailSubmit.onclick = async () => {
+      const email = document.getElementById('emailInput').value.trim();
+      const password = document.getElementById('passwordInput').value.trim();
+      const errorEl = document.getElementById('emailError');
+      
+      if (errorEl) errorEl.textContent = '';
+      
+      if (!email || !password) {
+        if (errorEl) errorEl.textContent = 'Please enter email and password';
+        return;
+      }
+      
+      setLoading(btnEmailSubmit, true);
+      try {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          if (errorEl) errorEl.textContent = error.message || 'Sign in failed';
+          setLoading(btnEmailSubmit, false);
+          return;
+        }
+        
+        const { data: { user } } = await supabase.auth.getUser();
+        const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+        
+        if (!profile?.is_approved) {
+          await supabase.auth.signOut();
+          if (errorEl) errorEl.textContent = 'Account pending approval.';
+          setLoading(btnEmailSubmit, false);
+          return;
+        }
+        
+        currentUser = profile;
+        document.getElementById('emailInput').value = '';
+        document.getElementById('passwordInput').value = '';
+        navigationStack = ['screenDashboard'];
+        showScreen('screenDashboard');
+        updateDashboardUI();
+        
+        const today = new Date().toISOString().slice(0,10);
+        const { count } = await supabase.from('task_history').select('*', { count: 'exact' }).eq('user_id', currentUser.id).gte('created_at', today);
+        todayTaskCount = count || 0;
+        const dailyCountEl = document.getElementById('dailyCount');
+        if (dailyCountEl) dailyCountEl.textContent = todayTaskCount;
+        setLoading(btnEmailSubmit, false);
+      } catch (err) {
+        if (errorEl) errorEl.textContent = err.message || 'Sign in error';
+        setLoading(btnEmailSubmit, false);
+      }
+    };
+  }
+
+  // Phone OTP
+  let phoneNumber = '';
+  
+  const btnSendOTP = document.getElementById('btnSendOTP');
+  if (btnSendOTP) {
+    btnSendOTP.onclick = async () => {
+      const phone = document.getElementById('phoneLoginInput').value.trim();
+      const errorEl = document.getElementById('phoneError');
+      if (errorEl) errorEl.textContent = '';
+      
+      if (!phone.match(/^07[0-9]{8}$/)) { 
+        if (errorEl) errorEl.textContent = 'Enter valid phone (07XXXXXXXX)';
+        return; 
+      }
+      
+      phoneNumber = '+256' + phone.slice(1);
+      setLoading(btnSendOTP, true);
+      try {
+        const { error } = await supabase.auth.signInWithOtp({ phone: phoneNumber });
+        if (error) { 
+          if (errorEl) errorEl.textContent = error.message || 'Failed to send';
+          setLoading(btnSendOTP, false);
+          return; 
+        }
+        if (errorEl) errorEl.textContent = '✓ Code sent!';
+        const otpInput = document.getElementById('otpInput');
+        const btnVerifyOTP = document.getElementById('btnVerifyOTP');
+        if (otpInput) otpInput.classList.remove('hidden');
+        if (btnVerifyOTP) btnVerifyOTP.classList.remove('hidden');
+        setLoading(btnSendOTP, false);
+      } catch (err) {
+        if (errorEl) errorEl.textContent = err.message || 'Error';
+        setLoading(btnSendOTP, false);
+      }
+    };
+  }
+
+  const btnVerifyOTP = document.getElementById('btnVerifyOTP');
+  if (btnVerifyOTP) {
+    btnVerifyOTP.onclick = async () => {
+      const token = document.getElementById('otpInput').value.trim();
+      const errorEl = document.getElementById('phoneError');
+      if (errorEl) errorEl.textContent = '';
+      
+      if (!token) {
+        if (errorEl) errorEl.textContent = 'Enter code';
+        return;
+      }
+      
+      setLoading(btnVerifyOTP, true);
+      try {
+        const { error } = await supabase.auth.verifyOtp({ phone: phoneNumber, token, type: 'sms' });
+        if (error) { 
+          if (errorEl) errorEl.textContent = error.message || 'Invalid code';
+          setLoading(btnVerifyOTP, false);
+          return; 
+        }
+        
+        const { data: { user } } = await supabase.auth.getUser();
+        const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+        
+        if (!profile?.is_approved) {
+          await supabase.auth.signOut();
+          if (errorEl) errorEl.textContent = 'Account pending approval';
+          setLoading(btnVerifyOTP, false);
+          return;
+        }
+        
+        currentUser = profile;
+        document.getElementById('phoneLoginInput').value = '';
+        document.getElementById('otpInput').value = '';
+        navigationStack = ['screenDashboard'];
+        showScreen('screenDashboard');
+        updateDashboardUI();
+        
+        const today = new Date().toISOString().slice(0,10);
+        const { count } = await supabase.from('task_history').select('*', { count: 'exact' }).eq('user_id', currentUser.id).gte('created_at', today);
+        todayTaskCount = count || 0;
+        const dailyCountEl = document.getElementById('dailyCount');
+        if (dailyCountEl) dailyCountEl.textContent = todayTaskCount;
+        setLoading(btnVerifyOTP, false);
+      } catch (err) {
+        if (errorEl) errorEl.textContent = err.message || 'Error';
+        setLoading(btnVerifyOTP, false);
+      }
+    };
+  }
+
+  // Registration
+  const btnRegisterSubmit = document.getElementById('btnRegisterSubmit');
+  if (btnRegisterSubmit) {
+    btnRegisterSubmit.onclick = async () => {
+      const name = document.getElementById('regFullName').value.trim();
+      const username = document.getElementById('regUsername').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const phone = document.getElementById('regPhone').value.trim();
+      const network = document.getElementById('regNetwork').value;
+      const userType = document.getElementById('regUserType').value;
+      const code = document.getElementById('regActivationCode').value.trim();
+      const errorEl = document.getElementById('regError');
+      
+      if (errorEl) errorEl.textContent = '';
+      
+      if (!name || !username || !email || password.length < 6 || !phone.match(/^07[0-9]{8}$/) || !network) {
+        if (errorEl) errorEl.textContent = 'Fill all fields correctly';
+        return;
+      }
+
+      const MASTER_ACTIVATION_CODE = "BACK2SCHOOL2025";
+      if (code !== MASTER_ACTIVATION_CODE) {
+        if (errorEl) errorEl.textContent = 'Invalid code';
+        return;
+      }
+
+      setLoading(btnRegisterSubmit, true);
+      try {
+        const { data: authData, error: authErr } = await supabase.auth.signUp({ email, password });
+        if (authErr) { 
+          if (errorEl) errorEl.textContent = authErr.message;
+          setLoading(btnRegisterSubmit, false);
+          return; 
+        }
+
+        const userId = authData.user.id;
+        const pending = parseInt(localStorage.getItem('demoBalance') || '0');
+        const { error: profileErr } = await supabase.from('profiles').insert([{
+          id: userId, full_name: name, username, phone, network, user_type: userType,
+          balance: pending, ref_code: userId.substring(0,8).toUpperCase(), is_approved: false, tasks_completed: 0
+        }]);
+        
+        if (profileErr) { 
+          if (errorEl) errorEl.textContent = 'Registration failed';
+          setLoading(btnRegisterSubmit, false);
+          return; 
+        }
+
+        localStorage.removeItem('demoBalance');
+        showToast('✓ Registered! Awaiting approval...');
+        document.getElementById('regFullName').value = '';
+        document.getElementById('regUsername').value = '';
+        document.getElementById('regEmail').value = '';
+        document.getElementById('regPassword').value = '';
+        document.getElementById('regPhone').value = '';
+        document.getElementById('regActivationCode').value = '';
+        
+        setLoading(btnRegisterSubmit, false);
+        navigationStack = ['screenSplash'];
+        showScreen('screenSplash');
+      } catch (err) {
+        if (errorEl) errorEl.textContent = err.message;
+        setLoading(btnRegisterSubmit, false);
+      }
+    };
+  }
+
+  // Demo tasks
+  const demoTasks = {
+    'demoSurvey': () => launchSurvey(() => addDemoReward(2500)),
+    'demoQuiz': () => launchQuiz(() => addDemoReward(2000)),
+    'demoMemory': () => launchMemoryGame(() => addDemoReward(2200)),
+    'demoReflex': () => launchReflex(() => addDemoReward(1500)),
+    'demoSpin': () => spinWheel(p => addDemoReward(p)),
+    'demoTicTac': () => launchTicTacToe((won) => won && addDemoReward(1800))
+  };
+  
+  Object.entries(demoTasks).forEach(([id, handler]) => {
+    const el = document.getElementById(id);
+    if (el) el.onclick = handler;
+  });
+  
+  const btnDemoWithdraw = document.getElementById('btnDemoWithdraw');
+  if (btnDemoWithdraw) {
+    btnDemoWithdraw.onclick = () => {
+      localStorage.setItem('demoBalance', demoBalance);
+      const pendingEl = document.getElementById('pendingEarnings');
+      if (pendingEl) pendingEl.textContent = demoBalance;
+      showScreen('screenRegister');
+    };
+  }
+
+  // Full task handlers
+  const fullTasks = {
+    'fullSurvey': 'survey',
+    'fullQuiz': 'quiz',
+    'fullMemory': 'memory',
+    'fullReflex': 'reflex',
+    'fullSpin': 'spin',
+    'fullTicTac': 'tictactoe'
+  };
+  
+  Object.entries(fullTasks).forEach(([id, type]) => {
+    const el = document.getElementById(id);
+    if (el) el.onclick = () => performTask(type, 500);
+  });
+
+  // Support and other buttons
+  const btnSendSupport = document.getElementById('btnSendSupport');
+  if (btnSendSupport) {
+    btnSendSupport.onclick = async () => {
+      const msg = document.getElementById('supportMsg').value.trim();
+      if (!msg) { showToast('Enter a message', true); return; }
+      if (!currentUser) { showToast('Not logged in', true); return; }
+      const { error } = await supabase.from('support_messages').insert([{ user_id: currentUser.id, message: msg }]);
+      if (error) { showToast('Error sending', true); } else { 
+        showToast('Message sent!');
+        document.getElementById('supportMsg').value = '';
+        const supportConfirm = document.getElementById('supportConfirm');
+        if (supportConfirm) supportConfirm.textContent = '✓ Thank you for your message. We\'ll get back to you soon!';
+      }
+    };
+  }
+
+  const btnWithdraw = document.getElementById('btnWithdraw');
+  if (btnWithdraw) {
+    btnWithdraw.onclick = async () => {
+      if (!currentUser || currentUser.balance < 35000) { showToast('Not eligible', true); return; }
+      const { error } = await supabase.from('withdrawals').insert([{ user_id: currentUser.id, amount: 35000, status: 'pending' }]);
+      if (!error) { 
+        currentUser.balance = 0;
+        updateDashboardUI();
+        showToast('Withdrawal request submitted!');
+      } else { showToast('Error', true); }
+    };
+  }
+
+  const btnCopyRef = document.getElementById('btnCopyRef');
+  if (btnCopyRef) {
+    btnCopyRef.onclick = () => {
+      const ref = currentUser?.ref_code || 'N/A';
+      navigator.clipboard.writeText(ref).then(() => showToast(`Copied: ${ref}`));
+    };
+  }
+
+  const btnLogout = document.getElementById('btnLogout');
+  if (btnLogout) {
+    btnLogout.onclick = async () => {
+      await supabase.auth.signOut();
+      currentUser = null;
+      navigationStack = ['screenSplash'];
+      showScreen('screenSplash');
+      showToast('Logged out');
+    };
+  }
+
+  const btnAdminPanel = document.getElementById('btnAdminPanel');
+  if (btnAdminPanel) {
+    btnAdminPanel.onclick = () => {
+      showScreen('screenAdmin');
+      loadAdminPendingUsers();
+      loadAdminSupport();
+      loadAdminWithdrawals();
+    };
+  }
+
+  const btnBackToDashboard = document.getElementById('btnBackToDashboard');
+  if (btnBackToDashboard) {
+    btnBackToDashboard.onclick = () => showScreen('screenDashboard');
+  }
+  
+  const btnBackFromDemo = document.getElementById('btnBackFromDemo');
+  if (btnBackFromDemo) {
+    btnBackFromDemo.onclick = () => showScreen('screenSplash');
+  }
+  
+  console.log('Initialization complete!'); // Debug log
+});
+</script>
+</body>
+</html>
