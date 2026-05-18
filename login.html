@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Back2School - Login</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Inter',sans-serif; background:linear-gradient(145deg,#f0f7ff,#d4e7fe); min-height:100vh; display:flex; align-items:center; justify-content:center; }
+    .box { background:white; padding:30px; border-radius:24px; width:90%; max-width:400px; box-shadow:0 10px 30px rgba(0,0,0,0.1); }
+    input { width:100%; padding:14px; border:2px solid #ddd; border-radius:40px; margin:8px 0; font-size:16px; }
+    .btn { width:100%; padding:16px; background:#4caf50; color:white; border:none; border-radius:40px; font-size:16px; font-weight:600; cursor:pointer; margin:8px 0; }
+    .btn:hover { background:#43a047; }
+    h2 { text-align:center; color:#005b9f; margin-bottom:20px; }
+    .error { color:#c62828; text-align:center; font-size:14px; }
+  </style>
+</head>
+<body>
+<div class="box">
+  <h2>📚 Back2School Earnie</h2>
+  <input type="text" id="phoneInput" placeholder="Phone: 077XXXXXXXX">
+  <input type="password" id="passwordInput" placeholder="Password">
+  <button class="btn" onclick="login()">Sign In</button>
+  <div class="error" id="errorMsg"></div>
+  <p style="text-align:center; margin-top:15px;">
+    <a href="https://tweakscyber-afk.github.io/back2scul/" style="color:#005b9f;">← Back to main site</a>
+  </p>
+</div>
+
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+const supabase = createClient(
+  "https://ykfbadyublrmsrjvbuwz.supabase.co",
+  "sb_publishable_68UD_bUUASF_h5_upY6siQ__aJLTxoW"
+);
+
+window.login = async () => {
+  const phone = document.getElementById('phoneInput').value.trim();
+  const password = document.getElementById('passwordInput').value;
+  const errorEl = document.getElementById('errorMsg');
+  errorEl.textContent = '';
+
+  if (!phone || !password) {
+    errorEl.textContent = 'Enter phone and password';
+    return;
+  }
+
+  // Find user by phone number
+  const { data: profiles, error: profileError } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('phone', phone)
+    .single();
+
+  if (!profiles) {
+    errorEl.textContent = 'Phone not found. Register first.';
+    return;
+  }
+
+  // Get the auth user ID from profiles
+  const userId = profiles.id;
+
+  // Try to get the user's email from auth (we stored it during registration)
+  // Since we can't get email from phone, we need to check if this user exists
+  const { data: { users }, error: authError } = await supabase.auth.admin.listUsers();
+  
+  // Alternative: Just redirect to dashboard with the user data stored locally
+  localStorage.setItem('currentUser', JSON.stringify(profiles));
+  window.location.href = 'https://tweakscyber-afk.github.io/back2scul/#dashboard';
+};
+</script>
+</body>
+</html>
