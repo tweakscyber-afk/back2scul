@@ -209,7 +209,7 @@
   <div class="screen" id="screenRegister">
     <h2 style="color:#005b9f;">📝 Create Account</h2>
     <div style="background:#e3f2fd; padding:12px; border-radius:16px; margin-bottom:8px;">
-      💰 Demo earnings: <strong id="pendingEarnings">0</strong> UGX will be added after approval.
+      💰 Demo earnings: <strong id="pendingEarnings">0</strong> UGX will be added after registration.
     </div>
     <input type="text" id="regFullName" placeholder="Full Name" autocomplete="name">
     <input type="text" id="regUsername" placeholder="Username" autocomplete="username">
@@ -297,16 +297,12 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUser = null;
 let demoBalance = 2000;
 let todayTaskCount = 0;
-
-// Navigation stack for history tracking
 let navigationStack = ['screenSplash'];
 let modalOpen = false;
 
 // ---------- HELPERS ----------
 function showToast(msg, isError = false) {
-  // Remove existing toasts
   document.querySelectorAll('.toast').forEach(t => t.remove());
-  
   const t = document.createElement('div');
   t.className = `toast ${isError ? 'error' : ''}`;
   t.textContent = msg;
@@ -316,39 +312,23 @@ function showToast(msg, isError = false) {
 
 function showScreen(id) {
   if (modalOpen) return;
-  
-  // Hide all screens
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  
-  // Show the requested screen
   const screen = document.getElementById(id);
   if (screen) {
     screen.classList.add('active');
-    
-    // Update navigation stack (avoid duplicates)
     if (navigationStack[navigationStack.length - 1] !== id) {
       navigationStack.push(id);
     }
-    
-    console.log('Showing screen:', id); // Debug log
-  } else {
-    console.error('Screen not found:', id);
   }
 }
 
 function goBack() {
   if (modalOpen) return;
-  
   if (navigationStack.length > 1) {
-    navigationStack.pop(); // Remove current screen
+    navigationStack.pop();
     const previousScreen = navigationStack[navigationStack.length - 1];
-    
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    const screen = document.getElementById(previousScreen);
-    if (screen) {
-      screen.classList.add('active');
-      console.log('Going back to:', previousScreen); // Debug log
-    }
+    document.getElementById(previousScreen).classList.add('active');
   }
 }
 
@@ -365,8 +345,7 @@ function setLoading(btn, isLoading) {
 }
 
 function clearErrors() {
-  const errorEls = ['emailError', 'phoneError', 'regError'];
-  errorEls.forEach(id => {
+  ['emailError', 'phoneError', 'regError'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.textContent = '';
   });
@@ -374,84 +353,37 @@ function clearErrors() {
 
 function closeModal() {
   const overlay = document.querySelector('.modal-overlay');
-  if (overlay) {
-    overlay.remove();
-    modalOpen = false;
-  }
+  if (overlay) { overlay.remove(); modalOpen = false; }
 }
 
-// ========== TAB SWITCHING FIX ==========
+// ========== TAB SWITCHING ==========
 function initTabSwitching() {
-  console.log('Initializing tab switching...'); // Debug log
-  
-  // Dashboard tabs (Tasks/Support/About)
   const dashboardTabs = document.querySelectorAll('#screenDashboard .nav-tab');
-  console.log('Found dashboard tabs:', dashboardTabs.length); // Debug log
-  
   dashboardTabs.forEach(tab => {
     tab.addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      
+      e.preventDefault(); e.stopPropagation();
       const tabName = this.getAttribute('data-tab');
-      console.log('Dashboard tab clicked:', tabName); // Debug log
-      
-      // Remove active class from all tabs
       dashboardTabs.forEach(t => t.classList.remove('active'));
-      
-      // Hide all tab content
-      const tabTasks = document.getElementById('tabTasks');
-      const tabSupport = document.getElementById('tabSupport');
-      const tabAbout = document.getElementById('tabAbout');
-      
-      if (tabTasks) tabTasks.classList.add('hidden');
-      if (tabSupport) tabSupport.classList.add('hidden');
-      if (tabAbout) tabAbout.classList.add('hidden');
-      
-      // Activate clicked tab
+      ['tabTasks','tabSupport','tabAbout'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
       this.classList.add('active');
-      
-      // Show corresponding tab content
       const tabContent = document.getElementById(tabName);
-      if (tabContent) {
-        tabContent.classList.remove('hidden');
-        console.log('Showing tab content:', tabName); // Debug log
-      } else {
-        console.error('Tab content not found:', tabName);
-      }
+      if (tabContent) tabContent.classList.remove('hidden');
     });
   });
 
-  // Admin dashboard tabs
   const adminTabs = document.querySelectorAll('#screenAdmin .nav-tab');
-  console.log('Found admin tabs:', adminTabs.length); // Debug log
-  
   adminTabs.forEach(tab => {
     tab.addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      
+      e.preventDefault(); e.stopPropagation();
       const tabName = this.getAttribute('data-admin-tab');
-      console.log('Admin tab clicked:', tabName); // Debug log
-      
-      // Remove active class from all tabs
       adminTabs.forEach(t => t.classList.remove('active'));
-      
-      // Hide all admin tab content
-      const adminTabContents = document.querySelectorAll('.admin-tab');
-      adminTabContents.forEach(content => content.classList.add('hidden'));
-      
-      // Activate clicked tab
+      document.querySelectorAll('.admin-tab').forEach(c => c.classList.add('hidden'));
       this.classList.add('active');
-      
-      // Show corresponding admin tab content
       const tabContent = document.getElementById(tabName);
-      if (tabContent) {
-        tabContent.classList.remove('hidden');
-        console.log('Showing admin tab content:', tabName); // Debug log
-      } else {
-        console.error('Admin tab content not found:', tabName);
-      }
+      if (tabContent) tabContent.classList.remove('hidden');
     });
   });
 }
@@ -464,39 +396,19 @@ function launchSurvey(callback) {
     { q: "Would you recommend Back2School Earnie?", opts: ["Yes", "No", "Maybe"] }
   ];
   let idx = 0;
-  const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay';
-  const box = document.createElement('div');
-  box.className = 'modal-box';
-  
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'modal-close-btn';
+  const overlay = document.createElement('div'); overlay.className = 'modal-overlay';
+  const box = document.createElement('div'); box.className = 'modal-box';
+  const closeBtn = document.createElement('button'); closeBtn.className = 'modal-close-btn';
   closeBtn.innerHTML = '<span class="material-symbols-outlined">close</span>';
   closeBtn.onclick = () => { overlay.remove(); modalOpen = false; callback(false); };
-  
-  box.appendChild(closeBtn);
-  overlay.appendChild(box);
-  document.body.appendChild(overlay);
-  modalOpen = true;
+  box.appendChild(closeBtn); overlay.appendChild(box); document.body.appendChild(overlay); modalOpen = true;
   
   function render() {
     if (idx >= questions.length) { overlay.remove(); modalOpen = false; callback(true); return; }
     const q = questions[idx];
-    
-    // Clear box except close button
-    while (box.firstChild) {
-      box.removeChild(box.firstChild);
-    }
-    
-    // Re-add close button
+    while (box.firstChild) box.removeChild(box.firstChild);
     box.appendChild(closeBtn);
-    
-    // Add question
-    const h3 = document.createElement('h3');
-    h3.textContent = q.q;
-    box.appendChild(h3);
-    
-    // Add options
+    const h3 = document.createElement('h3'); h3.textContent = q.q; box.appendChild(h3);
     q.opts.forEach(opt => {
       const btn = document.createElement('div');
       btn.style.cssText = 'padding:12px;margin:6px 0;background:#e8f5e9;border-radius:40px;cursor:pointer;text-align:center;';
@@ -515,39 +427,19 @@ function launchQuiz(callback) {
     { q: "How many continents are there?", a: "7", opts: ["5", "6", "7"] }
   ];
   let idx = 0;
-  const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay';
-  const box = document.createElement('div');
-  box.className = 'modal-box';
-  
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'modal-close-btn';
+  const overlay = document.createElement('div'); overlay.className = 'modal-overlay';
+  const box = document.createElement('div'); box.className = 'modal-box';
+  const closeBtn = document.createElement('button'); closeBtn.className = 'modal-close-btn';
   closeBtn.innerHTML = '<span class="material-symbols-outlined">close</span>';
   closeBtn.onclick = () => { overlay.remove(); modalOpen = false; callback(false); };
-  
-  box.appendChild(closeBtn);
-  overlay.appendChild(box);
-  document.body.appendChild(overlay);
-  modalOpen = true;
+  box.appendChild(closeBtn); overlay.appendChild(box); document.body.appendChild(overlay); modalOpen = true;
   
   function render() {
     if (idx >= qs.length) { overlay.remove(); modalOpen = false; callback(true); return; }
     const q = qs[idx];
-    
-    // Clear box except close button
-    while (box.firstChild) {
-      box.removeChild(box.firstChild);
-    }
-    
-    // Re-add close button
+    while (box.firstChild) box.removeChild(box.firstChild);
     box.appendChild(closeBtn);
-    
-    // Add question
-    const h3 = document.createElement('h3');
-    h3.textContent = q.q;
-    box.appendChild(h3);
-    
-    // Add options
+    const h3 = document.createElement('h3'); h3.textContent = q.q; box.appendChild(h3);
     q.opts.forEach(opt => {
       const btn = document.createElement('div');
       btn.style.cssText = 'padding:12px;margin:6px 0;background:#fff3e0;border-radius:40px;cursor:pointer;text-align:center;';
@@ -566,20 +458,13 @@ function launchMemoryGame(callback) {
   const icons = ['🐙','🐬','🦋','🐧','🦊','🐝'];
   let cards = [...icons, ...icons].sort(() => Math.random() - 0.5);
   let opened = [], matched = [];
-  const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay';
+  const overlay = document.createElement('div'); overlay.className = 'modal-overlay';
   const grid = document.createElement('div');
   grid.style.cssText = 'background:white;padding:24px;border-radius:24px;display:flex;flex-direction:column;align-items:center;max-height:80vh;overflow-y:auto;position:relative;';
-  
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'modal-close-btn';
+  const closeBtn = document.createElement('button'); closeBtn.className = 'modal-close-btn';
   closeBtn.innerHTML = '<span class="material-symbols-outlined">close</span>';
   closeBtn.onclick = () => { overlay.remove(); modalOpen = false; callback(false); };
-  
-  grid.appendChild(closeBtn);
-  overlay.appendChild(grid);
-  document.body.appendChild(overlay);
-  modalOpen = true;
+  grid.appendChild(closeBtn); overlay.appendChild(grid); document.body.appendChild(overlay); modalOpen = true;
   
   function render() {
     const cardsContainer = document.createElement('div');
@@ -590,56 +475,40 @@ function launchMemoryGame(callback) {
       card.textContent = (matched.includes(idx) || opened.includes(idx)) ? icon : '❓';
       card.onclick = () => {
         if (opened.length === 2 || matched.includes(idx) || opened.includes(idx)) return;
-        opened.push(idx);
-        render();
+        opened.push(idx); render();
         if (opened.length === 2) {
-          if (cards[opened[0]] === cards[opened[1]]) {
-            matched.push(...opened);
-          }
+          if (cards[opened[0]] === cards[opened[1]]) matched.push(...opened);
           setTimeout(() => { opened = []; render(); if (matched.length === cards.length) { overlay.remove(); modalOpen = false; callback(true); } }, 500);
         }
       };
       cardsContainer.appendChild(card);
     });
-    
-    // Remove old cards container if exists
     const oldContainer = grid.querySelector('div:not([class])');
     if (oldContainer) oldContainer.remove();
-    
     grid.appendChild(cardsContainer);
   }
   render();
 }
 
 function launchReflex(callback) {
-  const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay';
-  const box = document.createElement('div');
-  box.className = 'modal-box';
-  box.style.cssText = 'text-align:center;';
-  
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'modal-close-btn';
+  const overlay = document.createElement('div'); overlay.className = 'modal-overlay';
+  const box = document.createElement('div'); box.className = 'modal-box'; box.style.cssText = 'text-align:center;';
+  const closeBtn = document.createElement('button'); closeBtn.className = 'modal-close-btn';
   closeBtn.innerHTML = '<span class="material-symbols-outlined">close</span>';
   closeBtn.onclick = () => { overlay.remove(); modalOpen = false; callback(false); };
-  
   box.appendChild(closeBtn);
   box.innerHTML += `<h3>⚡ Tap within 1.5s!</h3><div id="reflexTimer" style="font-size:2rem;margin:12px;">1.5</div><button id="tapReflexBtn" class="btn btn-primary">TAP</button>`;
-  overlay.appendChild(box);
-  document.body.appendChild(overlay);
-  modalOpen = true;
-  
+  overlay.appendChild(box); document.body.appendChild(overlay); modalOpen = true;
   let startTime = Date.now();
-  const tapBtn = document.getElementById('tapReflexBtn');
-  if (tapBtn) {
-    tapBtn.onclick = () => {
+  setTimeout(() => {
+    const tapBtn = document.getElementById('tapReflexBtn');
+    if (tapBtn) tapBtn.onclick = () => {
       const time = (Date.now() - startTime) / 1000;
-      overlay.remove();
-      modalOpen = false;
+      overlay.remove(); modalOpen = false;
       if (time <= 1.5) callback(true);
       else { showToast('Too slow!', true); }
     };
-  }
+  }, 100);
 }
 
 function spinWheel(callback) {
@@ -651,38 +520,28 @@ function spinWheel(callback) {
 
 function launchTicTacToe(callback) {
   const board = Array(9).fill(null);
-  const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay';
+  const overlay = document.createElement('div'); overlay.className = 'modal-overlay';
   const grid = document.createElement('div');
   grid.style.cssText = 'background:white;padding:24px;border-radius:24px;display:flex;flex-direction:column;align-items:center;position:relative;';
-  
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'modal-close-btn';
+  const closeBtn = document.createElement('button'); closeBtn.className = 'modal-close-btn';
   closeBtn.innerHTML = '<span class="material-symbols-outlined">close</span>';
   closeBtn.onclick = () => { overlay.remove(); modalOpen = false; callback(false); };
-  
-  grid.appendChild(closeBtn);
-  overlay.appendChild(grid);
-  document.body.appendChild(overlay);
-  modalOpen = true;
+  grid.appendChild(closeBtn); overlay.appendChild(grid); document.body.appendChild(overlay); modalOpen = true;
   
   function checkWin() {
     const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
     for (const [a,b,c] of wins) if (board[a] && board[a]===board[b] && board[a]===board[c]) return board[a];
     return null;
   }
-  
   function computerMove() {
     const empty = board.reduce((a, v, i) => (v===null && a.push(i), a), []);
     if (empty.length) {
       const pick = empty[Math.floor(Math.random()*empty.length)];
-      board[pick] = 'O';
-      render();
+      board[pick] = 'O'; render();
       if (checkWin()==='O') { overlay.remove(); modalOpen = false; callback(false); showToast('Computer won!', true); }
       else if (!board.includes(null)) { overlay.remove(); modalOpen = false; callback(false); showToast('Draw!', true); }
     }
   }
-  
   function render() {
     const boardContainer = document.createElement('div');
     boardContainer.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:50px;';
@@ -692,19 +551,15 @@ function launchTicTacToe(callback) {
       cell.textContent = v || '';
       cell.onclick = () => {
         if (v || checkWin()) return;
-        board[i] = 'X';
-        render();
+        board[i] = 'X'; render();
         if (checkWin()==='X') { overlay.remove(); modalOpen = false; callback(true); }
         else if (!board.includes(null)) { overlay.remove(); modalOpen = false; callback(false); }
         else setTimeout(computerMove, 400);
       };
       boardContainer.appendChild(cell);
     });
-    
-    // Remove old board container if exists
     const oldContainer = grid.querySelector('div:not([class])');
     if (oldContainer) oldContainer.remove();
-    
     grid.appendChild(boardContainer);
   }
   render();
@@ -716,21 +571,14 @@ function updateDemoUI() {
   const progressEl = document.getElementById('demoProgress');
   const progressTextEl = document.getElementById('demoProgressText');
   const withdrawBtn = document.getElementById('btnDemoWithdraw');
-  
   if (balanceEl) balanceEl.textContent = demoBalance;
-  
   const pct = Math.min((demoBalance / 10000) * 100, 100);
   if (progressEl) progressEl.style.width = pct + '%';
   if (progressTextEl) progressTextEl.textContent = `${demoBalance} / 10,000`;
-  
   if (withdrawBtn) {
-    if (demoBalance >= 10000) {
-      withdrawBtn.classList.remove('hidden');
-    } else {
-      withdrawBtn.classList.add('hidden');
-    }
+    if (demoBalance >= 10000) withdrawBtn.classList.remove('hidden');
+    else withdrawBtn.classList.add('hidden');
   }
-  
   localStorage.setItem('demoBalance', demoBalance);
 }
 
@@ -746,10 +594,7 @@ async function performTask(type, baseReward) {
     showToast('Daily task limit (10) reached', true);
     return;
   }
-  
-  let reward = 0;
-  let success = false;
-  
+  let reward = 0, success = false;
   const result = await new Promise(resolve => {
     switch(type) {
       case 'survey': launchSurvey(r => resolve(r)); break;
@@ -760,60 +605,30 @@ async function performTask(type, baseReward) {
       case 'tictactoe': launchTicTacToe(r => resolve(r)); break;
     }
   });
-  
-  if (typeof result === 'number') {
-    reward = result;
-    success = true;
-  } else if (result === true) {
-    success = true;
-    // For non-spin tasks that succeed, give a random reward
-    if (type !== 'spin') {
-      reward = Math.floor(baseReward * (0.8 + Math.random() * 0.4));
-    }
-  } else {
-    showToast('Task cancelled');
-    return;
-  }
+  if (typeof result === 'number') { reward = result; success = true; }
+  else if (result === true) { success = true; if (type !== 'spin') reward = Math.floor(baseReward * (0.8 + Math.random() * 0.4)); }
+  else { showToast('Task cancelled'); return; }
 
   if (success) {
-    // Update balance in database
     if (reward > 0) {
       const { error } = await supabase.from('profiles').update({
         balance: currentUser.balance + reward,
         tasks_completed: currentUser.tasks_completed + 1
       }).eq('id', currentUser.id);
-      
-      if (error) { 
-        showToast('Error saving earnings', true); 
-        return; 
-      }
-      
+      if (error) { showToast('Error saving earnings', true); return; }
       currentUser.balance += reward;
       currentUser.tasks_completed += 1;
-      
-      // Record task history
-      await supabase.from('task_history').insert([{ 
-        user_id: currentUser.id, 
-        task_type: type, 
-        reward 
-      }]);
+      await supabase.from('task_history').insert([{ user_id: currentUser.id, task_type: type, reward }]);
     } else {
       const { error } = await supabase.from('profiles').update({
         tasks_completed: currentUser.tasks_completed + 1
       }).eq('id', currentUser.id);
-      
-      if (error) { 
-        showToast('Error updating tasks count', true); 
-        return; 
-      }
-      
+      if (error) { showToast('Error updating tasks count', true); return; }
       currentUser.tasks_completed += 1;
     }
-
     todayTaskCount++;
     const dailyCountEl = document.getElementById('dailyCount');
     if (dailyCountEl) dailyCountEl.textContent = todayTaskCount;
-    
     updateDashboardUI();
     showToast(reward > 0 ? `+${reward} UGX` : 'Task completed (no reward this time)');
   }
@@ -821,19 +636,15 @@ async function performTask(type, baseReward) {
 
 function updateDashboardUI() {
   if (!currentUser) return;
-  
   const balanceEl = document.getElementById('userBalance');
   const progressEl = document.getElementById('withdrawProgress');
   const progressTextEl = document.getElementById('withdrawProgressText');
   const wbtn = document.getElementById('btnWithdraw');
   const adminBtn = document.getElementById('btnAdminPanel');
-  
   if (balanceEl) balanceEl.textContent = currentUser.balance;
-  
   const pct = Math.min((currentUser.balance / 35000) * 100, 100);
   if (progressEl) progressEl.style.width = pct + '%';
   if (progressTextEl) progressTextEl.textContent = `${currentUser.balance} / 35,000`;
-  
   if (wbtn) {
     if (currentUser.balance >= 35000) {
       wbtn.disabled = false;
@@ -843,13 +654,9 @@ function updateDashboardUI() {
       wbtn.innerHTML = `<span class="material-symbols-outlined">payments</span> Need ${35000 - currentUser.balance} UGX`;
     }
   }
-  
   if (adminBtn) {
-    if (currentUser.is_admin) {
-      adminBtn.classList.remove('hidden');
-    } else {
-      adminBtn.classList.add('hidden');
-    }
+    if (currentUser.is_admin) adminBtn.classList.remove('hidden');
+    else adminBtn.classList.add('hidden');
   }
 }
 
@@ -857,9 +664,7 @@ function updateDashboardUI() {
 async function loadAdminPendingUsers() {
   const { data } = await supabase.from('profiles').select('*').eq('is_approved', false);
   const container = document.getElementById('adminUsers');
-  
   if (!container) return;
-  
   container.innerHTML = data?.length ? data.map(u => `
     <div style="background:white;border-radius:16px;padding:16px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,0.05);">
       <strong>${u.full_name}</strong> (@${u.username})<br>
@@ -868,7 +673,6 @@ async function loadAdminPendingUsers() {
     </div>
   `).join('') : '<p>No pending users.</p>';
 }
-
 window.approveUser = async (id) => {
   await supabase.from('profiles').update({ is_approved: true }).eq('id', id);
   loadAdminPendingUsers();
@@ -877,9 +681,7 @@ window.approveUser = async (id) => {
 async function loadAdminSupport() {
   const { data } = await supabase.from('support_messages').select('*, profiles(full_name, username)').order('created_at', { ascending: false });
   const container = document.getElementById('adminSupport');
-  
   if (!container) return;
-  
   container.innerHTML = data?.map(m => `
     <div style="background:white;border-radius:16px;padding:16px;margin-bottom:8px;">
       <strong>${m.profiles?.full_name || 'Unknown'}</strong><br>${m.message}
@@ -889,22 +691,17 @@ async function loadAdminSupport() {
     </div>
   `).join('') || 'No messages.';
 }
-
 window.sendAdminReply = async (id) => {
   const replyEl = document.getElementById(`reply-${id}`);
   if (!replyEl) return;
-  
-  const reply = replyEl.value;
-  await supabase.from('support_messages').update({ admin_reply: reply, replied: true }).eq('id', id);
+  await supabase.from('support_messages').update({ admin_reply: replyEl.value, replied: true }).eq('id', id);
   loadAdminSupport();
 };
 
 async function loadAdminWithdrawals() {
   const { data } = await supabase.from('withdrawals').select('*, profiles(full_name, phone)').order('created_at', { ascending: false });
   const container = document.getElementById('adminWithdrawals');
-  
   if (!container) return;
-  
   container.innerHTML = data?.map(w => `
     <div style="background:white;border-radius:16px;padding:16px;margin-bottom:8px;">
       <strong>${w.profiles?.full_name}</strong> · ${w.amount} UGX · ${w.status}
@@ -915,32 +712,26 @@ async function loadAdminWithdrawals() {
     </div>
   `).join('') || 'No withdrawals.';
 }
-
 window.updateWithdrawal = async (id, status) => {
   await supabase.from('withdrawals').update({ status }).eq('id', id);
   loadAdminWithdrawals();
 };
 
-// Expose navigation globally
 window.goBack = goBack;
 window.showScreen = showScreen;
 window.modalOpen = false;
 
 // ---------- INITIALIZATION ----------
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('DOM loaded, initializing...'); // Debug log
-  
   clearErrors();
-  
-  // Initialize tab switching FIRST
   initTabSwitching();
   
-  // Restore session
   try {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
       const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-      if (profile?.is_approved) {
+      // ✅ FIX #1: Removed is_approved check - all users can log in
+      if (profile) {
         currentUser = profile;
         navigationStack = ['screenDashboard'];
         showScreen('screenDashboard');
@@ -965,409 +756,217 @@ document.addEventListener('DOMContentLoaded', async () => {
     showScreen('screenSplash');
   }
 
-  // ===== ALL BUTTON EVENT LISTENERS =====
-  
   // Splash
-  const btnDemo = document.getElementById('btnDemo');
-  if (btnDemo) {
-    btnDemo.onclick = () => {
-      clearErrors();
-      demoBalance = parseInt(localStorage.getItem('demoBalance') || '2000');
-      updateDemoUI();
-      showScreen('screenDemo');
-    };
-  }
-  
-  const btnGoAuth = document.getElementById('btnGoAuth');
-  if (btnGoAuth) {
-    btnGoAuth.onclick = () => {
-      clearErrors();
-      showScreen('screenAuth');
-    };
-  }
+  document.getElementById('btnDemo').onclick = () => { clearErrors(); demoBalance = parseInt(localStorage.getItem('demoBalance') || '2000'); updateDemoUI(); showScreen('screenDemo'); };
+  document.getElementById('btnGoAuth').onclick = () => { clearErrors(); showScreen('screenAuth'); };
+  document.getElementById('btnBackFromDemo').onclick = () => showScreen('screenSplash');
 
-  // Auth selection
-  const btnEmailLogin = document.getElementById('btnEmailLogin');
-  if (btnEmailLogin) {
-    btnEmailLogin.onclick = () => {
-      clearErrors();
-      showScreen('screenEmailLogin');
-    };
-  }
-  
-  const btnPhoneLogin = document.getElementById('btnPhoneLogin');
-  if (btnPhoneLogin) {
-    btnPhoneLogin.onclick = () => {
-      clearErrors();
-      showScreen('screenPhoneLogin');
-    };
-  }
-  
-  const linkToRegister = document.getElementById('linkToRegister');
-  if (linkToRegister) {
-    linkToRegister.onclick = e => { 
-      e.preventDefault(); 
-      clearErrors();
-      showScreen('screenRegister'); 
-    };
-  }
-  
-  const backToAuth1 = document.getElementById('backToAuth1');
-  if (backToAuth1) {
-    backToAuth1.onclick = e => { 
-      e.preventDefault(); 
-      clearErrors();
-      goBack();
-    };
-  }
-  
-  const backToAuth2 = document.getElementById('backToAuth2');
-  if (backToAuth2) {
-    backToAuth2.onclick = e => { 
-      e.preventDefault(); 
-      clearErrors();
-      goBack();
-    };
-  }
-  
-  const backFromAuth = document.getElementById('backFromAuth');
-  if (backFromAuth) {
-    backFromAuth.onclick = e => { 
-      e.preventDefault(); 
-      clearErrors();
-      goBack();
-    };
-  }
-  
-  const goToAuth = document.getElementById('goToAuth');
-  if (goToAuth) {
-    goToAuth.onclick = e => { 
-      e.preventDefault(); 
-      clearErrors();
-      goBack();
-    };
-  }
+  // Auth
+  document.getElementById('btnEmailLogin').onclick = () => { clearErrors(); showScreen('screenEmailLogin'); };
+  document.getElementById('btnPhoneLogin').onclick = () => { clearErrors(); showScreen('screenPhoneLogin'); };
+  document.getElementById('linkToRegister').onclick = e => { e.preventDefault(); clearErrors(); showScreen('screenRegister'); };
+  document.getElementById('backToAuth1').onclick = e => { e.preventDefault(); clearErrors(); goBack(); };
+  document.getElementById('backToAuth2').onclick = e => { e.preventDefault(); clearErrors(); goBack(); };
+  document.getElementById('backFromAuth').onclick = e => { e.preventDefault(); clearErrors(); goBack(); };
+  document.getElementById('goToAuth').onclick = e => { e.preventDefault(); clearErrors(); goBack(); };
 
   // Email login
-  const btnEmailSubmit = document.getElementById('btnEmailSubmit');
-  if (btnEmailSubmit) {
-    btnEmailSubmit.onclick = async () => {
-      const email = document.getElementById('emailInput').value.trim();
-      const password = document.getElementById('passwordInput').value.trim();
-      const errorEl = document.getElementById('emailError');
-      
-      if (errorEl) errorEl.textContent = '';
-      
-      if (!email || !password) {
-        if (errorEl) errorEl.textContent = 'Please enter email and password';
+  document.getElementById('btnEmailSubmit').onclick = async () => {
+    const email = document.getElementById('emailInput').value.trim();
+    const password = document.getElementById('passwordInput').value.trim();
+    const errorEl = document.getElementById('emailError');
+    if (errorEl) errorEl.textContent = '';
+    if (!email || !password) { if (errorEl) errorEl.textContent = 'Please enter email and password'; return; }
+    setLoading(document.getElementById('btnEmailSubmit'), true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) { if (errorEl) errorEl.textContent = error.message || 'Sign in failed'; setLoading(document.getElementById('btnEmailSubmit'), false); return; }
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+      // ✅ FIX #2: Removed is_approved check
+      if (!profile) {
+        await supabase.auth.signOut();
+        if (errorEl) errorEl.textContent = 'Account not found. Please register first.';
+        setLoading(document.getElementById('btnEmailSubmit'), false);
         return;
       }
-      
-      setLoading(btnEmailSubmit, true);
-      try {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-          if (errorEl) errorEl.textContent = error.message || 'Sign in failed';
-          setLoading(btnEmailSubmit, false);
-          return;
-        }
-        
-        const { data: { user } } = await supabase.auth.getUser();
-        const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-        
-        if (!profile?.is_approved) {
-          await supabase.auth.signOut();
-          if (errorEl) errorEl.textContent = 'Account pending approval.';
-          setLoading(btnEmailSubmit, false);
-          return;
-        }
-        
-        currentUser = profile;
-        document.getElementById('emailInput').value = '';
-        document.getElementById('passwordInput').value = '';
-        navigationStack = ['screenDashboard'];
-        showScreen('screenDashboard');
-        updateDashboardUI();
-        
-        const today = new Date().toISOString().slice(0,10);
-        const { count } = await supabase.from('task_history').select('*', { count: 'exact' }).eq('user_id', currentUser.id).gte('created_at', today);
-        todayTaskCount = count || 0;
-        const dailyCountEl = document.getElementById('dailyCount');
-        if (dailyCountEl) dailyCountEl.textContent = todayTaskCount;
-        setLoading(btnEmailSubmit, false);
-      } catch (err) {
-        if (errorEl) errorEl.textContent = err.message || 'Sign in error';
-        setLoading(btnEmailSubmit, false);
-      }
-    };
-  }
+      currentUser = profile;
+      document.getElementById('emailInput').value = '';
+      document.getElementById('passwordInput').value = '';
+      navigationStack = ['screenDashboard'];
+      showScreen('screenDashboard');
+      updateDashboardUI();
+      const today = new Date().toISOString().slice(0,10);
+      const { count } = await supabase.from('task_history').select('*', { count: 'exact' }).eq('user_id', currentUser.id).gte('created_at', today);
+      todayTaskCount = count || 0;
+      const dailyCountEl = document.getElementById('dailyCount');
+      if (dailyCountEl) dailyCountEl.textContent = todayTaskCount;
+      setLoading(document.getElementById('btnEmailSubmit'), false);
+    } catch (err) {
+      if (errorEl) errorEl.textContent = err.message || 'Sign in error';
+      setLoading(document.getElementById('btnEmailSubmit'), false);
+    }
+  };
 
   // Phone OTP
   let phoneNumber = '';
-  
-  const btnSendOTP = document.getElementById('btnSendOTP');
-  if (btnSendOTP) {
-    btnSendOTP.onclick = async () => {
-      const phone = document.getElementById('phoneLoginInput').value.trim();
-      const errorEl = document.getElementById('phoneError');
-      if (errorEl) errorEl.textContent = '';
-      
-      if (!phone.match(/^07[0-9]{8}$/)) { 
-        if (errorEl) errorEl.textContent = 'Enter valid phone (07XXXXXXXX)';
-        return; 
-      }
-      
-      phoneNumber = '+256' + phone.slice(1);
-      setLoading(btnSendOTP, true);
-      try {
-        const { error } = await supabase.auth.signInWithOtp({ phone: phoneNumber });
-        if (error) { 
-          if (errorEl) errorEl.textContent = error.message || 'Failed to send';
-          setLoading(btnSendOTP, false);
-          return; 
-        }
-        if (errorEl) errorEl.textContent = '✓ Code sent!';
-        const otpInput = document.getElementById('otpInput');
-        const btnVerifyOTP = document.getElementById('btnVerifyOTP');
-        if (otpInput) otpInput.classList.remove('hidden');
-        if (btnVerifyOTP) btnVerifyOTP.classList.remove('hidden');
-        setLoading(btnSendOTP, false);
-      } catch (err) {
-        if (errorEl) errorEl.textContent = err.message || 'Error';
-        setLoading(btnSendOTP, false);
-      }
-    };
-  }
+  document.getElementById('btnSendOTP').onclick = async () => {
+    const phone = document.getElementById('phoneLoginInput').value.trim();
+    const errorEl = document.getElementById('phoneError');
+    if (errorEl) errorEl.textContent = '';
+    if (!phone.match(/^07[0-9]{8}$/)) { if (errorEl) errorEl.textContent = 'Enter valid phone (07XXXXXXXX)'; return; }
+    phoneNumber = '+256' + phone.slice(1);
+    setLoading(document.getElementById('btnSendOTP'), true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({ phone: phoneNumber });
+      if (error) { if (errorEl) errorEl.textContent = error.message || 'Failed to send'; setLoading(document.getElementById('btnSendOTP'), false); return; }
+      if (errorEl) errorEl.textContent = '✓ Code sent!';
+      document.getElementById('otpInput').classList.remove('hidden');
+      document.getElementById('btnVerifyOTP').classList.remove('hidden');
+      setLoading(document.getElementById('btnSendOTP'), false);
+    } catch (err) {
+      if (errorEl) errorEl.textContent = err.message || 'Error';
+      setLoading(document.getElementById('btnSendOTP'), false);
+    }
+  };
 
-  const btnVerifyOTP = document.getElementById('btnVerifyOTP');
-  if (btnVerifyOTP) {
-    btnVerifyOTP.onclick = async () => {
-      const token = document.getElementById('otpInput').value.trim();
-      const errorEl = document.getElementById('phoneError');
-      if (errorEl) errorEl.textContent = '';
-      
-      if (!token) {
-        if (errorEl) errorEl.textContent = 'Enter code';
+  document.getElementById('btnVerifyOTP').onclick = async () => {
+    const token = document.getElementById('otpInput').value.trim();
+    const errorEl = document.getElementById('phoneError');
+    if (errorEl) errorEl.textContent = '';
+    if (!token) { if (errorEl) errorEl.textContent = 'Enter code'; return; }
+    setLoading(document.getElementById('btnVerifyOTP'), true);
+    try {
+      const { error } = await supabase.auth.verifyOtp({ phone: phoneNumber, token, type: 'sms' });
+      if (error) { if (errorEl) errorEl.textContent = error.message || 'Invalid code'; setLoading(document.getElementById('btnVerifyOTP'), false); return; }
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+      // ✅ FIX #3: Removed is_approved check
+      if (!profile) {
+        await supabase.auth.signOut();
+        if (errorEl) errorEl.textContent = 'Account not found. Please register first.';
+        setLoading(document.getElementById('btnVerifyOTP'), false);
         return;
       }
-      
-      setLoading(btnVerifyOTP, true);
-      try {
-        const { error } = await supabase.auth.verifyOtp({ phone: phoneNumber, token, type: 'sms' });
-        if (error) { 
-          if (errorEl) errorEl.textContent = error.message || 'Invalid code';
-          setLoading(btnVerifyOTP, false);
-          return; 
-        }
-        
-        const { data: { user } } = await supabase.auth.getUser();
-        const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-        
-        if (!profile?.is_approved) {
-          await supabase.auth.signOut();
-          if (errorEl) errorEl.textContent = 'Account pending approval';
-          setLoading(btnVerifyOTP, false);
-          return;
-        }
-        
-        currentUser = profile;
-        document.getElementById('phoneLoginInput').value = '';
-        document.getElementById('otpInput').value = '';
-        navigationStack = ['screenDashboard'];
-        showScreen('screenDashboard');
-        updateDashboardUI();
-        
-        const today = new Date().toISOString().slice(0,10);
-        const { count } = await supabase.from('task_history').select('*', { count: 'exact' }).eq('user_id', currentUser.id).gte('created_at', today);
-        todayTaskCount = count || 0;
-        const dailyCountEl = document.getElementById('dailyCount');
-        if (dailyCountEl) dailyCountEl.textContent = todayTaskCount;
-        setLoading(btnVerifyOTP, false);
-      } catch (err) {
-        if (errorEl) errorEl.textContent = err.message || 'Error';
-        setLoading(btnVerifyOTP, false);
-      }
-    };
-  }
+      currentUser = profile;
+      document.getElementById('phoneLoginInput').value = '';
+      document.getElementById('otpInput').value = '';
+      navigationStack = ['screenDashboard'];
+      showScreen('screenDashboard');
+      updateDashboardUI();
+      const today = new Date().toISOString().slice(0,10);
+      const { count } = await supabase.from('task_history').select('*', { count: 'exact' }).eq('user_id', currentUser.id).gte('created_at', today);
+      todayTaskCount = count || 0;
+      const dailyCountEl = document.getElementById('dailyCount');
+      if (dailyCountEl) dailyCountEl.textContent = todayTaskCount;
+      setLoading(document.getElementById('btnVerifyOTP'), false);
+    } catch (err) {
+      if (errorEl) errorEl.textContent = err.message || 'Error';
+      setLoading(document.getElementById('btnVerifyOTP'), false);
+    }
+  };
 
   // Registration
-  const btnRegisterSubmit = document.getElementById('btnRegisterSubmit');
-  if (btnRegisterSubmit) {
-    btnRegisterSubmit.onclick = async () => {
-      const name = document.getElementById('regFullName').value.trim();
-      const username = document.getElementById('regUsername').value.trim();
-      const email = document.getElementById('regEmail').value.trim();
-      const password = document.getElementById('regPassword').value;
-      const phone = document.getElementById('regPhone').value.trim();
-      const network = document.getElementById('regNetwork').value;
-      const userType = document.getElementById('regUserType').value;
-      const code = document.getElementById('regActivationCode').value.trim();
-      const errorEl = document.getElementById('regError');
-      
-      if (errorEl) errorEl.textContent = '';
-      
-      if (!name || !username || !email || password.length < 6 || !phone.match(/^07[0-9]{8}$/) || !network) {
-        if (errorEl) errorEl.textContent = 'Fill all fields correctly';
-        return;
-      }
-
-      const MASTER_ACTIVATION_CODE = "BACK2SCHOOL2025";
-      if (code !== MASTER_ACTIVATION_CODE) {
-        if (errorEl) errorEl.textContent = 'Invalid code';
-        return;
-      }
-
-      setLoading(btnRegisterSubmit, true);
-      try {
-        const { data: authData, error: authErr } = await supabase.auth.signUp({ email, password });
-        if (authErr) { 
-          if (errorEl) errorEl.textContent = authErr.message;
-          setLoading(btnRegisterSubmit, false);
-          return; 
-        }
-
-        const userId = authData.user.id;
-        const pending = parseInt(localStorage.getItem('demoBalance') || '0');
-        const { error: profileErr } = await supabase.from('profiles').insert([{
-          id: userId, full_name: name, username, phone, network, user_type: userType,
-          balance: pending, ref_code: userId.substring(0,8).toUpperCase(), is_approved: false, tasks_completed: 0
-        }]);
-        
-        if (profileErr) { 
-          if (errorEl) errorEl.textContent = 'Registration failed';
-          setLoading(btnRegisterSubmit, false);
-          return; 
-        }
-
-        localStorage.removeItem('demoBalance');
-        showToast('✓ Registered! Awaiting approval...');
-        document.getElementById('regFullName').value = '';
-        document.getElementById('regUsername').value = '';
-        document.getElementById('regEmail').value = '';
-        document.getElementById('regPassword').value = '';
-        document.getElementById('regPhone').value = '';
-        document.getElementById('regActivationCode').value = '';
-        
-        setLoading(btnRegisterSubmit, false);
-        navigationStack = ['screenSplash'];
-        showScreen('screenSplash');
-      } catch (err) {
-        if (errorEl) errorEl.textContent = err.message;
-        setLoading(btnRegisterSubmit, false);
-      }
-    };
-  }
+  document.getElementById('btnRegisterSubmit').onclick = async () => {
+    const name = document.getElementById('regFullName').value.trim();
+    const username = document.getElementById('regUsername').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const phone = document.getElementById('regPhone').value.trim();
+    const network = document.getElementById('regNetwork').value;
+    const userType = document.getElementById('regUserType').value;
+    const code = document.getElementById('regActivationCode').value.trim();
+    const errorEl = document.getElementById('regError');
+    if (errorEl) errorEl.textContent = '';
+    if (!name || !username || !email || password.length < 6 || !phone.match(/^07[0-9]{8}$/) || !network) {
+      if (errorEl) errorEl.textContent = 'Fill all fields correctly'; return;
+    }
+    if (code !== "BACK2SCHOOL2025") { if (errorEl) errorEl.textContent = 'Invalid code'; return; }
+    setLoading(document.getElementById('btnRegisterSubmit'), true);
+    try {
+      const { data: authData, error: authErr } = await supabase.auth.signUp({ email, password });
+      if (authErr) { if (errorEl) errorEl.textContent = authErr.message; setLoading(document.getElementById('btnRegisterSubmit'), false); return; }
+      const userId = authData.user.id;
+      const pending = parseInt(localStorage.getItem('demoBalance') || '0');
+      const { error: profileErr } = await supabase.from('profiles').insert([{
+        id: userId, full_name: name, username, phone, network, user_type: userType,
+        balance: pending, ref_code: userId.substring(0,8).toUpperCase(), is_approved: false, tasks_completed: 0
+      }]);
+      if (profileErr) { if (errorEl) errorEl.textContent = 'Registration failed'; setLoading(document.getElementById('btnRegisterSubmit'), false); return; }
+      localStorage.removeItem('demoBalance');
+      showToast('✓ Registered successfully! You can now log in.');
+      ['regFullName','regUsername','regEmail','regPassword','regPhone','regActivationCode'].forEach(id => document.getElementById(id).value = '');
+      setLoading(document.getElementById('btnRegisterSubmit'), false);
+      navigationStack = ['screenSplash'];
+      showScreen('screenAuth');
+    } catch (err) {
+      if (errorEl) errorEl.textContent = err.message;
+      setLoading(document.getElementById('btnRegisterSubmit'), false);
+    }
+  };
 
   // Demo tasks
-  const demoTasks = {
-    'demoSurvey': () => launchSurvey(() => addDemoReward(2500)),
-    'demoQuiz': () => launchQuiz(() => addDemoReward(2000)),
-    'demoMemory': () => launchMemoryGame(() => addDemoReward(2200)),
-    'demoReflex': () => launchReflex(() => addDemoReward(1500)),
-    'demoSpin': () => spinWheel(p => addDemoReward(p)),
-    'demoTicTac': () => launchTicTacToe((won) => won && addDemoReward(1800))
+  document.getElementById('demoSurvey').onclick = () => launchSurvey(() => addDemoReward(2500));
+  document.getElementById('demoQuiz').onclick = () => launchQuiz(() => addDemoReward(2000));
+  document.getElementById('demoMemory').onclick = () => launchMemoryGame(() => addDemoReward(2200));
+  document.getElementById('demoReflex').onclick = () => launchReflex(() => addDemoReward(1500));
+  document.getElementById('demoSpin').onclick = () => spinWheel(p => addDemoReward(p));
+  document.getElementById('demoTicTac').onclick = () => launchTicTacToe((won) => won && addDemoReward(1800));
+  document.getElementById('btnDemoWithdraw').onclick = () => {
+    localStorage.setItem('demoBalance', demoBalance);
+    document.getElementById('pendingEarnings').textContent = demoBalance;
+    showScreen('screenRegister');
   };
-  
-  Object.entries(demoTasks).forEach(([id, handler]) => {
-    const el = document.getElementById(id);
-    if (el) el.onclick = handler;
-  });
-  
-  const btnDemoWithdraw = document.getElementById('btnDemoWithdraw');
-  if (btnDemoWithdraw) {
-    btnDemoWithdraw.onclick = () => {
-      localStorage.setItem('demoBalance', demoBalance);
-      const pendingEl = document.getElementById('pendingEarnings');
-      if (pendingEl) pendingEl.textContent = demoBalance;
-      showScreen('screenRegister');
-    };
-  }
 
-  // Full task handlers
-  const fullTasks = {
-    'fullSurvey': 'survey',
-    'fullQuiz': 'quiz',
-    'fullMemory': 'memory',
-    'fullReflex': 'reflex',
-    'fullSpin': 'spin',
-    'fullTicTac': 'tictactoe'
+  // Full tasks
+  document.getElementById('fullSurvey').onclick = () => performTask('survey', 500);
+  document.getElementById('fullQuiz').onclick = () => performTask('quiz', 500);
+  document.getElementById('fullMemory').onclick = () => performTask('memory', 500);
+  document.getElementById('fullReflex').onclick = () => performTask('reflex', 500);
+  document.getElementById('fullSpin').onclick = () => performTask('spin', 500);
+  document.getElementById('fullTicTac').onclick = () => performTask('tictactoe', 500);
+
+  // Support
+  document.getElementById('btnSendSupport').onclick = async () => {
+    const msg = document.getElementById('supportMsg').value.trim();
+    if (!msg) { showToast('Enter a message', true); return; }
+    if (!currentUser) { showToast('Not logged in', true); return; }
+    const { error } = await supabase.from('support_messages').insert([{ user_id: currentUser.id, message: msg }]);
+    if (error) { showToast('Error sending', true); } else { 
+      showToast('Message sent!');
+      document.getElementById('supportMsg').value = '';
+      document.getElementById('supportConfirm').textContent = '✓ Thank you for your message!';
+    }
   };
-  
-  Object.entries(fullTasks).forEach(([id, type]) => {
-    const el = document.getElementById(id);
-    if (el) el.onclick = () => performTask(type, 500);
-  });
 
-  // Support and other buttons
-  const btnSendSupport = document.getElementById('btnSendSupport');
-  if (btnSendSupport) {
-    btnSendSupport.onclick = async () => {
-      const msg = document.getElementById('supportMsg').value.trim();
-      if (!msg) { showToast('Enter a message', true); return; }
-      if (!currentUser) { showToast('Not logged in', true); return; }
-      const { error } = await supabase.from('support_messages').insert([{ user_id: currentUser.id, message: msg }]);
-      if (error) { showToast('Error sending', true); } else { 
-        showToast('Message sent!');
-        document.getElementById('supportMsg').value = '';
-        const supportConfirm = document.getElementById('supportConfirm');
-        if (supportConfirm) supportConfirm.textContent = '✓ Thank you for your message. We\'ll get back to you soon!';
-      }
-    };
-  }
+  document.getElementById('btnWithdraw').onclick = async () => {
+    if (!currentUser || currentUser.balance < 35000) { showToast('Not eligible', true); return; }
+    const { error } = await supabase.from('withdrawals').insert([{ user_id: currentUser.id, amount: 35000, status: 'pending' }]);
+    if (!error) { currentUser.balance = 0; updateDashboardUI(); showToast('Withdrawal request submitted!'); }
+    else { showToast('Error', true); }
+  };
 
-  const btnWithdraw = document.getElementById('btnWithdraw');
-  if (btnWithdraw) {
-    btnWithdraw.onclick = async () => {
-      if (!currentUser || currentUser.balance < 35000) { showToast('Not eligible', true); return; }
-      const { error } = await supabase.from('withdrawals').insert([{ user_id: currentUser.id, amount: 35000, status: 'pending' }]);
-      if (!error) { 
-        currentUser.balance = 0;
-        updateDashboardUI();
-        showToast('Withdrawal request submitted!');
-      } else { showToast('Error', true); }
-    };
-  }
+  document.getElementById('btnCopyRef').onclick = () => {
+    const ref = currentUser?.ref_code || 'N/A';
+    navigator.clipboard.writeText(ref).then(() => showToast(`Copied: ${ref}`));
+  };
 
-  const btnCopyRef = document.getElementById('btnCopyRef');
-  if (btnCopyRef) {
-    btnCopyRef.onclick = () => {
-      const ref = currentUser?.ref_code || 'N/A';
-      navigator.clipboard.writeText(ref).then(() => showToast(`Copied: ${ref}`));
-    };
-  }
+  document.getElementById('btnLogout').onclick = async () => {
+    await supabase.auth.signOut();
+    currentUser = null;
+    navigationStack = ['screenSplash'];
+    showScreen('screenSplash');
+    showToast('Logged out');
+  };
 
-  const btnLogout = document.getElementById('btnLogout');
-  if (btnLogout) {
-    btnLogout.onclick = async () => {
-      await supabase.auth.signOut();
-      currentUser = null;
-      navigationStack = ['screenSplash'];
-      showScreen('screenSplash');
-      showToast('Logged out');
-    };
-  }
+  document.getElementById('btnAdminPanel').onclick = () => {
+    showScreen('screenAdmin');
+    loadAdminPendingUsers();
+    loadAdminSupport();
+    loadAdminWithdrawals();
+  };
 
-  const btnAdminPanel = document.getElementById('btnAdminPanel');
-  if (btnAdminPanel) {
-    btnAdminPanel.onclick = () => {
-      showScreen('screenAdmin');
-      loadAdminPendingUsers();
-      loadAdminSupport();
-      loadAdminWithdrawals();
-    };
-  }
-
-  const btnBackToDashboard = document.getElementById('btnBackToDashboard');
-  if (btnBackToDashboard) {
-    btnBackToDashboard.onclick = () => showScreen('screenDashboard');
-  }
-  
-  const btnBackFromDemo = document.getElementById('btnBackFromDemo');
-  if (btnBackFromDemo) {
-    btnBackFromDemo.onclick = () => showScreen('screenSplash');
-  }
-  
-  console.log('Initialization complete!'); // Debug log
+  document.getElementById('btnBackToDashboard').onclick = () => showScreen('screenDashboard');
 });
 </script>
 </body>
